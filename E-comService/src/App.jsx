@@ -158,14 +158,7 @@ const AppContent = () => {
             </AdminPrivateRoute>
           }
         />
-        <Route
-          path="/admin/create-admin"
-          element={
-            <AdminPrivateRoute>
-              <CreateAdmin />
-            </AdminPrivateRoute>
-          }
-        />
+        <Route path="/admin/create-admin" element={<CreateAdmin />} />
         <Route
           path="/admin/edit-user/:userId"
           element={
