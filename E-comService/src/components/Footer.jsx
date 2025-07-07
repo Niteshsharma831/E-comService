@@ -161,9 +161,6 @@ const Footer = () => {
           >
             Devloper Profile II
           </a>
-          <Link to="/admin/dashboard">
-            <p>admin</p>
-          </Link>
         </p>
       </div>
     </footer>
