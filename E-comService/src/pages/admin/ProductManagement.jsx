@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import AdminLayout from "./AdminLayout";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
@@ -18,6 +20,7 @@ const ProductManagement = () => {
       setProducts(res.data.products || []);
     } catch (err) {
       console.error("Failed to fetch products:", err);
+      toast.error("Failed to load products");
     } finally {
       setLoading(false);
     }
@@ -30,9 +33,11 @@ const ProductManagement = () => {
       await axios.delete(
         `https://e-comservice.onrender.com/api/products/deleteproducts/${id}`
       );
-      setProducts(products.filter((p) => p._id !== id));
+      setProducts((prev) => prev.filter((p) => p._id !== id));
+      toast.success("Product deleted");
     } catch (err) {
       console.error("Delete failed:", err);
+      toast.error("Failed to delete product");
     }
   };
 
@@ -42,9 +47,9 @@ const ProductManagement = () => {
 
   return (
     <AdminLayout>
-      <div className="p-6 bg-gray-100 min-h-screen overflow-auto">
+      <div className="p-6 bg-gray-100 min-h-screen">
         <h2 className="text-2xl font-bold text-indigo-700 mb-4">
-          Product Management
+          🛒 Product Management
         </h2>
 
         {loading ? (
@@ -52,8 +57,8 @@ const ProductManagement = () => {
         ) : products.length === 0 ? (
           <p className="text-gray-600 text-center">No products found.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white shadow rounded-lg">
+          <div className="overflow-auto rounded-lg shadow">
+            <table className="min-w-full divide-y divide-gray-200 bg-white">
               <thead className="bg-indigo-700 text-white">
                 <tr>
                   <th className="py-2 px-4 text-left">Image</th>
@@ -68,12 +73,12 @@ const ProductManagement = () => {
                   <th className="py-2 px-4 text-left">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-100">
                 {products.map((product) => (
                   <tr key={product._id} className="hover:bg-gray-50">
                     <td className="py-2 px-4">
                       <img
-                        src={product.image}
+                        src={product.image || "https://via.placeholder.com/60"}
                         alt={product.name}
                         className="w-16 h-16 object-contain"
                       />
@@ -111,6 +116,8 @@ const ProductManagement = () => {
           </div>
         )}
       </div>
+
+      <ToastContainer position="top-center" autoClose={2000} />
     </AdminLayout>
   );
 };
