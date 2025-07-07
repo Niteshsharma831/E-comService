@@ -36,7 +36,7 @@ const Dashboard = () => {
         const userRes = await axios.get(
           "https://e-comservice.onrender.com/api/users/getallusers"
         );
-        const users = userRes.data; // 👈 array expected
+        const users = userRes.data; 
 
         setUserCount(users.length);
 

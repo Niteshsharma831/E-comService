@@ -109,14 +109,7 @@ const AppContent = () => {
           }
         />
         {/* Admin Routes */}
-        <Route
-          path="/admin/dashboard"
-          element={
-            <AdminPrivateRoute>
-              <Dashboard />
-            </AdminPrivateRoute>
-          }
-        />
+        <Route path="/admin/dashboard" element={<Dashboard />} />
         <Route
           path="/admin/users"
           element={
