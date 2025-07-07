@@ -17,7 +17,7 @@ const createUser = async (req, res) => {
     const existingUser = await userModel.findOne({ email });
     if (existingUser) {
       return res
-        .status(409) // Changed from 400 to 409 (Conflict)
+        .status(409)
         .json({ message: "User with this email already exists" });
     }
 
@@ -36,19 +36,34 @@ const createUser = async (req, res) => {
       updatedAt: new Date(),
     });
 
-    res.status(201).json({
-      message: "User created successfully",
-      user: {
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        profile: newUser.profilePicture,
-        phone: newUser.phone,
-        gender: newUser.gender,
-        address: newUser.address,
-        isAdmin: newUser.isAdmin,
-      },
+    // ✅ Generate JWT token
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
     });
+
+    // ✅ Set token as a secure cookie
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: true, // Required for Render (HTTPS)
+        sameSite: "None", // Required for cross-origin
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      })
+      .status(201)
+      .json({
+        message: "User created successfully",
+        user: {
+          id: newUser._id,
+          name: newUser.name,
+          email: newUser.email,
+          profile: newUser.profilePicture,
+          phone: newUser.phone,
+          gender: newUser.gender,
+          address: newUser.address,
+          isAdmin: newUser.isAdmin,
+        },
+      });
+
     await newUser.save();
   } catch (error) {
     res
