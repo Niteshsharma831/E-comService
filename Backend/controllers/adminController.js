@@ -2,14 +2,15 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const adminSchema = require("../models/adminModel");
 
+// @desc    Create a new admin
 const createAdmin = async (req, res) => {
   try {
     const { name, email, password, phone, address, profile, gender } = req.body;
 
     if (!name || !email || !password || !phone || !address || !gender) {
-      return res.status(400).json({
-        message: "All fields except profile are required",
-      });
+      return res
+        .status(400)
+        .json({ message: "All fields except profile are required" });
     }
 
     const existingAdmin = await adminSchema.findOne({ email });
@@ -28,47 +29,45 @@ const createAdmin = async (req, res) => {
       role: "admin",
       phone,
       address,
-      profile: profile || "",
       gender,
+      profile: profile || "",
     });
 
     await newAdmin.save();
 
-    // ✅ Generate JWT token
     const token = jwt.sign({ id: newAdmin._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
 
-    // ✅ Set token as a secure cookie
-    res
-      .cookie("token", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "None",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      })
-      .status(201)
-      .json({
-        message: "Admin created successfully",
-        admin: {
-          id: newAdmin._id,
-          name: newAdmin.name,
-          email: newAdmin.email,
-          phone: newAdmin.phone,
-          address: newAdmin.address,
-          role: newAdmin.role,
-          gender: newAdmin.gender,
-          profile: newAdmin.profile,
-        },
-      });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error creating admin",
-      error: error.message,
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true, // true in HTTPS (Render)
+      sameSite: "None", // required for cross-origin
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    res.status(201).json({
+      message: "Admin created successfully",
+      admin: {
+        id: newAdmin._id,
+        name: newAdmin.name,
+        email: newAdmin.email,
+        phone: newAdmin.phone,
+        address: newAdmin.address,
+        role: newAdmin.role,
+        gender: newAdmin.gender,
+        profile: newAdmin.profile,
+      },
+    });
+  } catch (error) {
+    console.error("Create Admin Error:", error);
+    res
+      .status(500)
+      .json({ message: "Error creating admin", error: error.message });
   }
 };
 
+// @desc    Login admin
 const loginAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -87,11 +86,10 @@ const loginAdmin = async (req, res) => {
       expiresIn: "7d",
     });
 
-    // ✅ Correct cross-origin cookie setup
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true, // ✅ Render uses HTTPS
-      sameSite: "None", // ✅ Required for cross-origin cookies
+      secure: true,
+      sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -109,10 +107,12 @@ const loginAdmin = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Login Error:", error);
     res.status(500).json({ message: "Login failed", error: error.message });
   }
 };
 
+// @desc    Get logged-in admin profile
 const adminProfile = async (req, res) => {
   try {
     const adminId = req.adminId; // ✅ injected by middleware
@@ -124,16 +124,25 @@ const adminProfile = async (req, res) => {
 
     res.status(200).json({ admin });
   } catch (err) {
+    console.error("Profile Error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+// @desc    Logout admin
 const logoutAdmin = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    secure: false, // true in production with HTTPS
-    sameSite: "Lax",
+    secure: true, // if deployed on HTTPS
+    sameSite: "None",
   });
 
-  return res.status(200).json({ message: "Logged out successfully" });
+  res.status(200).json({ message: "Logged out successfully" });
 };
-module.exports = { createAdmin, loginAdmin, adminProfile, logoutAdmin };
+
+module.exports = {
+  createAdmin,
+  loginAdmin,
+  adminProfile,
+  logoutAdmin,
+};

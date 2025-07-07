@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import axios from "axios";
 
 const AdminPrivateRoute = ({ children }) => {
-  const [authStatus, setAuthStatus] = useState("checking"); // checking | authenticated | unauthenticated
+  const [authStatus, setAuthStatus] = useState("checking");
 
   useEffect(() => {
     const verifyAdmin = async () => {
@@ -12,32 +12,23 @@ const AdminPrivateRoute = ({ children }) => {
           "https://e-comservice.onrender.com/api/admin/admin-profile",
           { withCredentials: true }
         );
-
-        if (res.data && res.data.admin) {
-          setAuthStatus("authenticated");
-        } else {
-          setAuthStatus("unauthenticated");
-        }
-      } catch (error) {
+        if (res.data?.admin) setAuthStatus("authenticated");
+        else setAuthStatus("unauthenticated");
+      } catch (err) {
         setAuthStatus("unauthenticated");
       }
     };
-
     verifyAdmin();
   }, []);
 
   if (authStatus === "checking") {
-    return (
-      <div className="h-screen flex items-center justify-center text-indigo-600 font-semibold text-xl">
-        Verifying Admin...
-      </div>
-    );
+    return <div className="text-center mt-10 text-blue-600">Verifying...</div>;
   }
 
   return authStatus === "authenticated" ? (
     children
   ) : (
-    <Navigate to="/admin-login" replace />
+    <Navigate to="/admin-login" />
   );
 };
 
