@@ -46,6 +46,12 @@ const categories = [
       "https://freepngimg.com/save/54009-grocery-picture-free-png-hq/900x600",
     route: "/grocery",
   },
+  {
+    name: "Grocery",
+    image:
+      "https://freepngimg.com/save/54009-grocery-picture-free-png-hq/900x600",
+    route: "/grocery",
+  },
 ];
 
 const CategoryBar = () => {
