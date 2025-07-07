@@ -3,28 +3,42 @@ import { Navigate } from "react-router-dom";
 import axios from "axios";
 
 const AdminPrivateRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [authStatus, setAuthStatus] = useState("checking"); // checking | authenticated | unauthenticated
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const verifyAdmin = async () => {
       try {
-        await axios.get("https://e-comservice.onrender.com/api/admin/admin-profile", {
-          withCredentials: true,
-        });
-        setIsAuthenticated(true);
-      } catch (err) {
-        setIsAuthenticated(false);
+        const res = await axios.get(
+          "https://e-comservice.onrender.com/api/admin/admin-profile",
+          { withCredentials: true }
+        );
+
+        if (res.data && res.data.admin) {
+          setAuthStatus("authenticated");
+        } else {
+          setAuthStatus("unauthenticated");
+        }
+      } catch (error) {
+        setAuthStatus("unauthenticated");
       }
     };
 
-    checkAuth();
+    verifyAdmin();
   }, []);
 
-  if (isAuthenticated === null) {
-    return <div className="p-4">Loading...</div>;
+  if (authStatus === "checking") {
+    return (
+      <div className="h-screen flex items-center justify-center text-indigo-600 font-semibold text-xl">
+        Verifying Admin...
+      </div>
+    );
   }
 
-  return isAuthenticated ? children : <Navigate to="/admin-login" />;
+  return authStatus === "authenticated" ? (
+    children
+  ) : (
+    <Navigate to="/admin-login" replace />
+  );
 };
 
 export default AdminPrivateRoute;
