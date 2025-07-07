@@ -1,0 +1,39 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Log files
+logs
+*.log
+npm-debug.log*
+
+# OS / IDE related
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# Build directories
+dist/
+build/
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Optional npm cache directory
+.npm/
+
+# MongoDB dump and temp
+dump/
+temp/
+*.tar.gz
+
+# Cache and debug
+.cache/
+.debug/
+
+# Uploaded files (e.g., from multer or similar)
+uploads/
