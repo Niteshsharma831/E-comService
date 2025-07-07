@@ -13,7 +13,7 @@ const ProductManagement = () => {
   const fetchProducts = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:3000/api/products/getallproducts"
+        "https://e-comservice.onrender.com/api/products/getallproducts"
       );
       setProducts(res.data.products || []);
     } catch (err) {
@@ -28,7 +28,7 @@ const ProductManagement = () => {
       return;
     try {
       await axios.delete(
-        `http://localhost:3000/api/products/deleteproducts/${id}`
+        `https://e-comservice.onrender.com/api/products/deleteproducts/${id}`
       );
       setProducts(products.filter((p) => p._id !== id));
     } catch (err) {

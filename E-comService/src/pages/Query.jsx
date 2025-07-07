@@ -21,7 +21,7 @@ function Query() {
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/users/query",
+        "https://e-comservice.onrender.com/api/users/query",
         formData,
         { withCredentials: true } 
       );

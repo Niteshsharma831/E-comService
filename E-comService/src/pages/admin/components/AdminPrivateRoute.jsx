@@ -8,7 +8,7 @@ const AdminPrivateRoute = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        await axios.get("http://localhost:3000/api/admin/admin-profile", {
+        await axios.get("https://e-comservice.onrender.com/api/admin/admin-profile", {
           withCredentials: true,
         });
         setIsAuthenticated(true);

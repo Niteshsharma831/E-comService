@@ -9,7 +9,7 @@ const Logout = () => {
   useEffect(() => {
     const logoutAdmin = async () => {
       try {
-        await axios.get("http://localhost:3000/api/admin/logout", {
+        await axios.get("https://e-comservice.onrender.com/api/admin/logout", {
           withCredentials: true, // so the cookie is included
         });
       } catch (err) {

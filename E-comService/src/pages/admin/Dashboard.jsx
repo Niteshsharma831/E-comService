@@ -29,12 +29,12 @@ const Dashboard = () => {
     const fetchCounts = async () => {
       try {
         const productRes = await axios.get(
-          "http://localhost:3000/api/products/count"
+          "https://e-comservice.onrender.com/api/products/count"
         );
         setProductCount(productRes.data.count);
 
         const userRes = await axios.get(
-          "http://localhost:3000/api/users/getallusers"
+          "https://e-comservice.onrender.com/api/users/getallusers"
         );
         const users = userRes.data; // 👈 array expected
 

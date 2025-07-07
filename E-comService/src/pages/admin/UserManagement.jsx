@@ -15,7 +15,7 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:3000/api/users/getallusers"
+        "https://e-comservice.onrender.com/api/users/getallusers"
       );
       setUsers(res.data);
       console.log("Fetched Users:", res.data);
@@ -39,7 +39,7 @@ const UserManagement = () => {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:3000/api/users/delete/${userId}`);
+      await axios.delete(`https://e-comservice.onrender.com/api/users/delete/${userId}`);
       fetchUsers();
     } catch (error) {
       console.error("❌ Failed to delete user:", error);

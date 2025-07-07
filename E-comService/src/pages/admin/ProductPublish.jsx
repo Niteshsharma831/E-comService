@@ -88,7 +88,7 @@ const ProductPublish = () => {
       };
 
       const res = await axios.post(
-        "http://localhost:3000/api/products/create",
+        "https://e-comservice.onrender.com/api/products/create",
         productData
       );
       setMessage("✅ Product Published Successfully!");

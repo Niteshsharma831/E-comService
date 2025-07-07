@@ -7,7 +7,7 @@ const OrderPage = () => {
   useEffect(() => {
     const fetchMyOrders = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/orders/mine", {
+        const res = await axios.get("https://e-comservice.onrender.com/api/orders/mine", {
           withCredentials: true,
         });
         setOrders(res.data.orders);

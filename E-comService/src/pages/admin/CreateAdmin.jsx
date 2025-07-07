@@ -65,7 +65,7 @@ const CreateAdmin = () => {
       };
 
       const { data } = await axios.post(
-        "http://localhost:3000/api/admin/create-admin",
+        "https://e-comservice.onrender.com/api/admin/create-admin",
         payload
       );
 

@@ -14,7 +14,7 @@ const GroceryPage = () => {
   const handleAddToCart = async (productId) => {
     try {
       await axios.post(
-        "http://localhost:3000/api/users/cart/add",
+        "https://e-comservice.onrender.com/api/users/cart/add",
         { productId, quantity: 1 },
         { withCredentials: true }
       );
@@ -64,7 +64,7 @@ const GroceryPage = () => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/api/products/getallproducts"
+          "https://e-comservice.onrender.com/api/products/getallproducts"
         );
         const allProducts = res.data.products || [];
 

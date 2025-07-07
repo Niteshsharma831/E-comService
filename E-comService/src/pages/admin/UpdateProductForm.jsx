@@ -30,7 +30,7 @@ const UpdateProductForm = () => {
     const fetchProduct = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/api/products/getproducts/${id}`
+          `https://e-comservice.onrender.com/api/products/getproducts/${id}`
         );
         const data = res.data.product;
         setFormData({
@@ -121,7 +121,7 @@ const UpdateProductForm = () => {
       };
 
       await axios.put(
-        `http://localhost:3000/api/products/updateproducts/${id}`,
+        `https://e-comservice.onrender.com/api/products/updateproducts/${id}`,
         productData
       );
 

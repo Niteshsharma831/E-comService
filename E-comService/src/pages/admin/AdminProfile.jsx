@@ -10,7 +10,7 @@ const AdminProfile = () => {
     const fetchAdmin = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/api/admin/admin-profile",
+          "https://e-comservice.onrender.com/api/admin/admin-profile",
           { withCredentials: true }
         );
         setAdmin(res.data.admin);

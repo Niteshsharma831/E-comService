@@ -20,7 +20,7 @@ const SmartPhones = () => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/api/products/getallproducts"
+          "https://e-comservice.onrender.com/api/products/getallproducts"
         );
         const phones = res.data.products.filter(
           (product) =>

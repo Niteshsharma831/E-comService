@@ -21,7 +21,7 @@ const LoginPages = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/users/login",
+        "https://e-comservice.onrender.com/api/users/login",
         formData,
         {
           withCredentials: true,

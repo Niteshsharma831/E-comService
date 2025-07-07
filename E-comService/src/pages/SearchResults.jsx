@@ -11,7 +11,7 @@ const SearchResults = () => {
     const fetchResults = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/api/products/search?query=${query}`
+          `https://e-comservice.onrender.com/api/products/search?query=${query}`
         );
         setResults(res.data.products);
       } catch (err) {

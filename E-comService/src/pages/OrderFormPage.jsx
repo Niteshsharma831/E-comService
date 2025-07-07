@@ -33,7 +33,7 @@ const OrderFormPage = () => {
 
     try {
       await axios.post(
-        "http://localhost:3000/api/users/create-order",
+        "https://e-comservice.onrender.com/api/users/create-order",
         {
           items: [{ productId: product._id, quantity: 1 }],
           fullName,

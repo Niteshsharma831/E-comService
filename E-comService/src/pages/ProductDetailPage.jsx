@@ -13,7 +13,7 @@ const ProductDetailPage = () => {
     const fetchProduct = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/api/products/getproducts/${id}`
+          `https://e-comservice.onrender.com/api/products/getproducts/${id}`
         );
         setProduct(res.data.product);
       } catch (err) {
@@ -30,7 +30,7 @@ const ProductDetailPage = () => {
   const handleAddToCart = async () => {
     try {
       await axios.post(
-        "http://localhost:3000/api/users/cart/add", // ✅ correct endpoint
+        "https://e-comservice.onrender.com/api/users/cart/add", // ✅ correct endpoint
         { productId: product._id, quantity: 1 }, // ✅ include quantity
         { withCredentials: true }
       );

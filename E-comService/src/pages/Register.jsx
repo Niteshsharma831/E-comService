@@ -99,7 +99,7 @@ const Register = () => {
         profile: imageUrl,
       };
 
-      await axios.post("http://localhost:3000/api/users/create", payload);
+      await axios.post("https://e-comservice.onrender.com/api/users/create", payload);
 
       toast.success("✅ Registration successful!");
       setFormData({

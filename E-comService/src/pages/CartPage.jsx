@@ -12,7 +12,7 @@ const CartPage = () => {
 
   const fetchCart = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/users/cart", {
+      const res = await axios.get("https://e-comservice.onrender.com/api/users/cart", {
         withCredentials: true,
       });
       setCart(res.data.cart || []);
@@ -37,7 +37,7 @@ const CartPage = () => {
 
   const handleRemove = async (productId) => {
     try {
-      await axios.delete(`http://localhost:3000/api/users/cart/${productId}`, {
+      await axios.delete(`https://e-comservice.onrender.com/api/users/cart/${productId}`, {
         withCredentials: true,
       });
       setCart(cart.filter((item) => item.productId._id !== productId));

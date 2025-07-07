@@ -50,7 +50,7 @@ const UpdateUserDetails = () => {
 
     try {
       await axios.put(
-        `http://localhost:3000/api/users/update/${userId}`,
+        `https://e-comservice.onrender.com/api/users/update/${userId}`,
         formData
       );
       toast.success("✅ User updated successfully");
@@ -68,7 +68,7 @@ const UpdateUserDetails = () => {
     const fetchUser = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/api/users/${userId}`
+          `https://e-comservice.onrender.com/api/users/${userId}`
         );
         const { name, email, address, phone } = res.data;
         setFormData({ name, email, password: "", address, phone });
