@@ -7,10 +7,13 @@ import "react-toastify/dist/ReactToastify.css";
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); // 🔁 loader state
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
       const res = await fetch(
         "https://e-comservice.onrender.com/api/admin/admin-login",
@@ -27,6 +30,7 @@ const AdminLogin = () => {
 
       if (!res.ok) {
         toast.error(data.message || "Login failed");
+        setLoading(false);
       } else {
         localStorage.setItem("admin", JSON.stringify(data.admin));
         toast.success("Login successful!");
@@ -34,6 +38,7 @@ const AdminLogin = () => {
       }
     } catch (err) {
       toast.error("Server error. Please try again.");
+      setLoading(false);
     }
   };
 
@@ -75,13 +80,19 @@ const AdminLogin = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800"
+              disabled={loading}
+              className={`w-full py-2 rounded text-white transition ${
+                loading
+                  ? "bg-blue-300 cursor-not-allowed"
+                  : "bg-blue-700 hover:bg-blue-800"
+              }`}
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
         </div>
       </div>
+
       <ToastContainer position="top-center" autoClose={2000} />
     </div>
   );
