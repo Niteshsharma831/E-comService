@@ -109,7 +109,14 @@ const AppContent = () => {
           }
         />
         {/* Admin Routes */}
-        <Route path="/admin/dashboard" element={<Dashboard />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminPrivateRoute>
+              <Dashboard />
+            </AdminPrivateRoute>
+          }
+        />
         <Route
           path="/admin/users"
           element={
@@ -158,7 +165,14 @@ const AppContent = () => {
             </AdminPrivateRoute>
           }
         />
-        <Route path="/admin/create-admin" element={<CreateAdmin />} />
+        <Route
+          path="/admin/create-admin"
+          element={
+            <AdminPrivateRoute>
+              <CreateAdmin />
+            </AdminPrivateRoute>
+          }
+        />
         <Route
           path="/admin/edit-user/:userId"
           element={
