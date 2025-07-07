@@ -69,15 +69,16 @@ const loginAdmin = async (req, res) => {
       return res.status(401).json({ message: "Invalid password" });
     }
 
-    const token = jwt.sign({ id: admin._id }, "your_jwt_secret", {
+    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
 
+    // ✅ Correct cross-origin cookie setup
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "Lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secure: true, // ✅ Render uses HTTPS
+      sameSite: "None", // ✅ Required for cross-origin cookies
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({
@@ -97,6 +98,7 @@ const loginAdmin = async (req, res) => {
     res.status(500).json({ message: "Login failed", error: error.message });
   }
 };
+
 const adminProfile = async (req, res) => {
   try {
     const adminId = req.adminId; // ✅ injected by middleware
