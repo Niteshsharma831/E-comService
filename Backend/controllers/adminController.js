@@ -34,19 +34,33 @@ const createAdmin = async (req, res) => {
 
     await newAdmin.save();
 
-    res.status(201).json({
-      message: "Admin created successfully",
-      admin: {
-        id: newAdmin._id,
-        name: newAdmin.name,
-        email: newAdmin.email,
-        phone: newAdmin.phone,
-        address: newAdmin.address,
-        role: newAdmin.role,
-        gender: newAdmin.gender,
-        profile: newAdmin.profile,
-      },
+    // ✅ Generate JWT token
+    const token = jwt.sign({ id: newAdmin._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
     });
+
+    // ✅ Set token as a secure cookie
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      })
+      .status(201)
+      .json({
+        message: "Admin created successfully",
+        admin: {
+          id: newAdmin._id,
+          name: newAdmin.name,
+          email: newAdmin.email,
+          phone: newAdmin.phone,
+          address: newAdmin.address,
+          role: newAdmin.role,
+          gender: newAdmin.gender,
+          profile: newAdmin.profile,
+        },
+      });
   } catch (error) {
     res.status(500).json({
       message: "Error creating admin",
