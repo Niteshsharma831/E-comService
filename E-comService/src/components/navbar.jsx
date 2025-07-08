@@ -148,34 +148,55 @@ const Navbar = () => {
                 Profile
               </button>
               {showDropdown && (
-                <div className="absolute right-0 mt-2 w-44 bg-white rounded shadow-md z-10">
-                  <Link
-                    to="/account"
-                    className="block px-4 py-2 hover:bg-blue-50"
-                    onClick={() => setShowDropdown(false)}
-                  >
-                    My Account
-                  </Link>
-                  <Link
-                    to="/cart"
-                    className="block px-4 py-2 hover:bg-blue-50"
-                    onClick={() => setShowDropdown(false)}
-                  >
-                    My Cart
-                  </Link>
-                  <Link
-                    to="/my-orders"
-                    className="block px-4 py-2 hover:bg-blue-50"
-                    onClick={() => setShowDropdown(false)}
-                  >
-                    My Orders
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
-                  >
-                    Logout
-                  </button>
+                <div className="ml-2 space-y-1">
+                  <li>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                        navigate("/account");
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Account
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                        navigate("/cart");
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Cart
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                        navigate("/my-orders");
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Orders
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                        handleLogout();
+                      }}
+                      className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
+                    >
+                      Logout
+                    </button>
+                  </li>
                 </div>
               )}
             </li>
