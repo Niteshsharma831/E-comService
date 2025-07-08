@@ -34,9 +34,10 @@ const OrderFormPage = () => {
         }));
       })
       .catch(() => {
-        // Ignore if not logged in or failed
+        toast.warning("⚠️ Please login to place an order.");
+        navigate("/login");
       });
-  }, []);
+  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,8 +47,8 @@ const OrderFormPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!product) {
-      toast.error("No product selected.");
+    if (!product || !product._id) {
+      toast.error("❌ Invalid product details. Please try again.");
       return;
     }
 
@@ -56,6 +57,8 @@ const OrderFormPage = () => {
       items: [{ productId: product._id, quantity: 1 }],
     };
 
+    console.log("Sending order payload:", orderPayload);
+
     try {
       const res = await axios.post(
         "https://e-comservice.onrender.com/api/users/create-order",
@@ -63,11 +66,16 @@ const OrderFormPage = () => {
         { withCredentials: true }
       );
 
-      toast.success("✅ Order placed!");
+      toast.success("✅ Order placed successfully!");
       navigate("/order-success");
     } catch (err) {
-      toast.error("❌ Failed to place order.");
-      console.error(err);
+      console.error("Order Error:", err.response?.data || err.message);
+      if (err.response?.status === 401) {
+        toast.warning("⚠️ Please login to place order.");
+        navigate("/login");
+      } else {
+        toast.error("❌ Failed to place order. Try again.");
+      }
     }
   };
 
@@ -135,7 +143,9 @@ const OrderFormPage = () => {
             className="w-full border p-2 rounded"
           >
             <option value="COD">Cash on Delivery</option>
-            <option value="Online">Online Payment (Coming Soon)</option>
+            <option value="Online" disabled>
+              Online Payment (Coming Soon)
+            </option>
           </select>
 
           <button
