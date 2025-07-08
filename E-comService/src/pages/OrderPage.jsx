@@ -17,6 +17,8 @@ const OrderFormPage = () => {
     paymentMethod: "COD",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     // Prefill user details if logged in
     axios
@@ -46,9 +48,11 @@ const OrderFormPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     if (!product || !product._id) {
       toast.error("❌ Invalid product details. Please try again.");
+      setIsSubmitting(false);
       return;
     }
 
@@ -56,8 +60,6 @@ const OrderFormPage = () => {
       ...form,
       items: [{ productId: product._id, quantity: 1 }],
     };
-
-    console.log("Sending order payload:", orderPayload);
 
     try {
       const res = await axios.post(
@@ -76,6 +78,8 @@ const OrderFormPage = () => {
       } else {
         toast.error("❌ Failed to place order. Try again.");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -150,9 +154,10 @@ const OrderFormPage = () => {
 
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+            disabled={isSubmitting}
+            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
           >
-            ✅ Place Order
+            ✅ {isSubmitting ? "Placing Order..." : "Place Order"}
           </button>
         </form>
       </div>
