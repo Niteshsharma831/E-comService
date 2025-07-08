@@ -308,29 +308,20 @@ const clearCart = async (req, res) => {
 const createOrder = async (req, res) => {
   try {
     const userId = req.userId;
+    console.log("User ID:", userId);
+    console.log("Request body:", req.body);
 
-    const {
-      fullName,
-      gender,
-      phone,
-      address,
-      pincode,
-      paymentMethod,
-      items,
-    } = req.body;
+    const { fullName, gender, phone, address, pincode, paymentMethod, items } =
+      req.body;
 
-    console.log("Incoming Order Data:", {
-      userId,
-      fullName,
-      gender,
-      phone,
-      address,
-      pincode,
-      paymentMethod,
-      items,
-    });
-
-    if (!fullName || !gender || !phone || !address || !pincode || !paymentMethod) {
+    if (
+      !fullName ||
+      !gender ||
+      !phone ||
+      !address ||
+      !pincode ||
+      !paymentMethod
+    ) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
@@ -341,21 +332,16 @@ const createOrder = async (req, res) => {
     } else {
       const user = await User.findById(userId).populate("cart.productId");
       if (!user || user.cart.length === 0) {
-        return res.status(400).json({ message: "Cart is empty. Cannot place order." });
+        return res.status(400).json({ message: "Cart is empty." });
       }
 
       orderItems = user.cart.map((item) => ({
-        productId: item.productId._id,
+        productId: item.productId._id || item.productId,
         quantity: item.quantity,
       }));
     }
 
-    // ✅ Validate each item
-    for (let i = 0; i < orderItems.length; i++) {
-      if (!orderItems[i].productId) {
-        return res.status(400).json({ message: "Invalid product in items." });
-      }
-    }
+    console.log("Order items to be saved:", orderItems);
 
     const newOrder = await Order.create({
       userId,
@@ -372,11 +358,14 @@ const createOrder = async (req, res) => {
       await User.findByIdAndUpdate(userId, { $set: { cart: [] } });
     }
 
-    res.status(201).json({ message: "Order placed successfully", order: newOrder });
-
+    return res
+      .status(201)
+      .json({ message: "Order placed successfully", order: newOrder });
   } catch (error) {
-    console.error("Order error:", error.message);
-    res.status(500).json({ message: "Something went wrong while placing order." });
+    console.error("Order error:", error);
+    return res
+      .status(500)
+      .json({ message: "Something went wrong while placing order." });
   }
 };
 
