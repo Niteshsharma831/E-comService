@@ -72,7 +72,6 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-md fixed top-0 left-0 w-full z-50 p-1">
-      {/* Top Row */}
       <div className="max-w-screen-xl mx-auto px-4 space-y-2 md:space-y-0 md:flex md:items-center md:justify-between">
         <div className="w-full md:w-auto">
           <div className="flex justify-between items-center">
@@ -122,14 +121,65 @@ const Navbar = () => {
         </form>
 
         {user && (
-          <div className="hidden md:block text-sm font-semibold text-gray-600 whitespace-nowrap">
-            👋 Welcome,{" "}
-            <span className="text-blue-700">{getFirstName(user.name)}</span>
-          </div>
+          <>
+            <li>
+              <button
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="block w-full text-left px-3 py-2 bg-gray-100 rounded"
+              >
+                👤 Profile
+              </button>
+            </li>
+
+            {showDropdown && (
+              <div className="ml-4 mt-1 space-y-1">
+                <button
+                  onClick={() => {
+                    setShowDropdown(false);
+                    setMenuOpen(false);
+                    setTimeout(() => navigate("/account"), 100);
+                  }}
+                  className="block w-full text-left px-4 py-2 rounded hover:bg-gray-100"
+                >
+                  My Account
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDropdown(false);
+                    setMenuOpen(false);
+                    setTimeout(() => navigate("/cart"), 100);
+                  }}
+                  className="block w-full text-left px-4 py-2 rounded hover:bg-gray-100"
+                >
+                  My Cart
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDropdown(false);
+                    setMenuOpen(false);
+                    setTimeout(() => navigate("/my-orders"), 100);
+                  }}
+                  className="block w-full text-left px-4 py-2 rounded hover:bg-gray-100"
+                >
+                  My Orders
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDropdown(false);
+                    setMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Bottom Menu Desktop */}
+      {/* Desktop Menu */}
       <div className="max-w-screen-xl mx-auto px-4 py-2 flex items-center justify-between">
         <ul className="hidden md:flex space-x-6 items-center font-medium w-full justify-center">
           <li>
@@ -205,49 +255,107 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
-      {showDropdown && (
-        <div className="mt-2 ml-2 rounded bg-white shadow-md z-10 border">
-          <button
-            onClick={() => {
-              setShowDropdown(false);
-              setMenuOpen(false);
-              setTimeout(() => navigate("/account"), 100);
-            }}
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-          >
-            My Account
-          </button>
-          <button
-            onClick={() => {
-              setShowDropdown(false);
-              setMenuOpen(false);
-              setTimeout(() => navigate("/cart"), 100);
-            }}
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-          >
-            My Cart
-          </button>
-          <button
-            onClick={() => {
-              setShowDropdown(false);
-              setMenuOpen(false);
-              setTimeout(() => navigate("/my-orders"), 100);
-            }}
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-          >
-            My Orders
-          </button>
-          <button
-            onClick={() => {
-              setShowDropdown(false);
-              setMenuOpen(false);
-              handleLogout();
-            }}
-            className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
-          >
-            Logout
-          </button>
-        </div>
+      {menuOpen && (
+        <ul className="md:hidden px-4 pb-4 space-y-2 font-medium bg-white shadow-md">
+          <li>
+            <Link to="/" onClick={() => setMenuOpen(false)}>
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link to="/shop" onClick={() => setMenuOpen(false)}>
+              Shop
+            </Link>
+          </li>
+          <li>
+            <Link to="/electronic" onClick={() => setMenuOpen(false)}>
+              Electronic
+            </Link>
+          </li>
+          <li>
+            <Link to="/home&tv" onClick={() => setMenuOpen(false)}>
+              Home & TV
+            </Link>
+          </li>
+          <li>
+            <Link to="/fashions" onClick={() => setMenuOpen(false)}>
+              Fashions
+            </Link>
+          </li>
+          <li>
+            <Link to="/grocery" onClick={() => setMenuOpen(false)}>
+              Grocery
+            </Link>
+          </li>
+
+          {user ? (
+            <>
+              <li className="relative">
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="block w-full text-left px-3 py-2 bg-gray-100 rounded"
+                >
+                  👤 Profile
+                </button>
+
+                {showDropdown && (
+                  <div className="mt-2 ml-2 rounded bg-white shadow-md z-10 border">
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                        setTimeout(() => navigate("/account"), 100);
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Account
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                        setTimeout(() => navigate("/cart"), 100);
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Cart
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                        setTimeout(() => navigate("/my-orders"), 100);
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Orders
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                        handleLogout();
+                      }}
+                      className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </li>
+            </>
+          ) : (
+            <li>
+              <Link
+                to="/login"
+                onClick={() => setMenuOpen(false)}
+                className="block bg-blue-600 text-white rounded px-3 py-1 w-fit"
+              >
+                Login
+              </Link>
+            </li>
+          )}
+        </ul>
       )}
 
       <ToastContainer position="top-right" autoClose={2000} hideProgressBar />
