@@ -6,7 +6,7 @@ const MyOrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchOrders = () => {
     axios
       .get("https://e-comservice.onrender.com/api/users/mine", {
         withCredentials: true,
@@ -18,7 +18,25 @@ const MyOrdersPage = () => {
         toast.error("❌ Failed to load orders");
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchOrders();
   }, []);
+
+  const handleCancel = async (orderId) => {
+    try {
+      await axios.put(
+        `https://e-comservice.onrender.com/api/users/update-order-status/${orderId}`,
+        { status: "Canceled" },
+        { withCredentials: true }
+      );
+      toast.success("✅ Order canceled successfully");
+      fetchOrders(); // Refresh orders
+    } catch (err) {
+      toast.error("❌ Failed to cancel order");
+    }
+  };
 
   return (
     <div className="min-h-screen mt-24 px-4 md:px-10 py-6 bg-gray-50">
@@ -41,6 +59,7 @@ const MyOrdersPage = () => {
                 <th className="p-3">Status</th>
                 <th className="p-3">Items</th>
                 <th className="p-3">Date</th>
+                <th className="p-3">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -51,11 +70,13 @@ const MyOrdersPage = () => {
                   <td className="p-3">{order.phone}</td>
                   <td className="p-3">{order.address}</td>
                   <td className="p-3">{order.paymentMethod}</td>
-                  <td className="p-3 text-green-600 font-semibold">
-                    {order.status}
+                  <td className="p-3 font-semibold text-sm">
+                    {order.status === "Canceled" ? (
+                      <span className="text-red-500">Canceled</span>
+                    ) : (
+                      <span className="text-green-600">Order Success</span>
+                    )}
                   </td>
-
-                  {/* ✅ Items with image and quantity */}
                   <td className="p-3 space-y-2">
                     {order.items.map((item, i) => (
                       <div key={i} className="flex items-center gap-2">
@@ -68,16 +89,27 @@ const MyOrdersPage = () => {
                           <p className="font-medium">
                             {item.productId?.name || "Unknown"}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs text-gray-600">
                             Qty: {item.quantity}
                           </p>
                         </div>
                       </div>
                     ))}
                   </td>
-
                   <td className="p-3">
                     {new Date(order.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="p-3">
+                    {order.status === "Canceled" ? (
+                      <span className="text-gray-400 text-xs">No Action</span>
+                    ) : (
+                      <button
+                        onClick={() => handleCancel(order._id)}
+                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
+                      >
+                        Cancel
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
