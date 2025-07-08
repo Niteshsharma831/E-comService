@@ -7,6 +7,7 @@ const MyOrdersPage = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = () => {
+    setLoading(true);
     axios
       .get("https://e-comservice.onrender.com/api/users/mine", {
         withCredentials: true,
@@ -26,15 +27,16 @@ const MyOrdersPage = () => {
 
   const handleCancel = async (orderId) => {
     try {
-      await axios.put(
+      const res = await axios.put(
         `https://e-comservice.onrender.com/api/users/update-status/${orderId}`,
         { status: "Cancelled" },
         { withCredentials: true }
       );
-      toast.success("✅ Order cancelled successfully");
-      fetchOrders(); // Refresh orders
+
+      toast.success(res.data.message || "✅ Order cancelled successfully");
+      fetchOrders();
     } catch (err) {
-      toast.error("❌ Failed to cancel order");
+      toast.error(err.response?.data?.message || "❌ Failed to cancel order");
     }
   };
 
