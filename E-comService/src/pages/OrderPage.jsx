@@ -14,7 +14,7 @@ const MyOrdersPage = () => {
       .then((res) => {
         setOrders(res.data.orders || []);
       })
-      .catch((err) => {
+      .catch(() => {
         toast.error("❌ Failed to load orders");
       })
       .finally(() => setLoading(false));
@@ -54,15 +54,28 @@ const MyOrdersPage = () => {
                   <td className="p-3 text-green-600 font-semibold">
                     {order.status}
                   </td>
-                  <td className="p-3 space-y-1">
+
+                  {/* ✅ Items with image and quantity */}
+                  <td className="p-3 space-y-2">
                     {order.items.map((item, i) => (
-                      <div key={i}>
-                        <p>
-                          {item.productId?.name || "Unknown"} × {item.quantity}
-                        </p>
+                      <div key={i} className="flex items-center gap-2">
+                        <img
+                          src={item.productId?.image}
+                          alt={item.productId?.name}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                        <div>
+                          <p className="font-medium">
+                            {item.productId?.name || "Unknown"}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Qty: {item.quantity}
+                          </p>
+                        </div>
                       </div>
                     ))}
                   </td>
+
                   <td className="p-3">
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
