@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaBars, FaTimes,FaSearch } from "react-icons/fa";
+import { FaBars, FaTimes, FaSearch } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -208,6 +208,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
+      {/* Mobile Menu */}
       {menuOpen && (
         <ul className="md:hidden px-4 pb-4 space-y-2 font-medium bg-white shadow-md">
           <li>
@@ -234,6 +235,8 @@ const Navbar = () => {
             <Link to="/fashions" onClick={() => setMenuOpen(false)}>
               Fashions
             </Link>
+          </li>
+          <li>
             <Link to="/grocery" onClick={() => setMenuOpen(false)}>
               Grocery
             </Link>
@@ -241,52 +244,58 @@ const Navbar = () => {
 
           {user ? (
             <>
-              <li className="text-blue-600 font-semibold">
-                👋 {getFirstName(user.name)}
-              </li>
-              <li>
+              <li className="relative">
                 <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    navigate("/account");
-                  }}
-                  className="block w-full text-left px-3 py-1"
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="block w-full text-left px-3 py-2 bg-gray-100 rounded"
                 >
-                  My Account
+                  👤 Profile
                 </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    navigate("/cart");
-                  }}
-                  className="block w-full text-left px-3 py-1"
-                >
-                  My Cart
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    navigate("/my-orders");
-                  }}
-                  className="block w-full text-left px-3 py-1"
-                >
-                  My Orders
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setMenuOpen(false);
-                  }}
-                  className="text-red-600 px-3 py-1"
-                >
-                  Logout
-                </button>
+
+                {showDropdown && (
+                  <div className="mt-2 ml-2 rounded bg-white shadow-md z-10 border">
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                        navigate("/account");
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Account
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                        navigate("/cart");
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Cart
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                        navigate("/my-orders");
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Orders
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
               </li>
             </>
           ) : (
@@ -302,6 +311,7 @@ const Navbar = () => {
           )}
         </ul>
       )}
+
       <ToastContainer position="top-right" autoClose={2000} hideProgressBar />
     </nav>
   );
