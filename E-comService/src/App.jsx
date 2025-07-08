@@ -1,4 +1,5 @@
 import React from "react";
+import { Analytics } from "@vercel/analytics/react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -69,6 +70,7 @@ const AppContent = () => {
   return (
     <>
       <ScrollToTop />
+      <Analytics />
       {!isAdmin && <Navbar />}
       <Routes>
         {/* Public Routes */}
