@@ -43,7 +43,6 @@ import UpdateUserDetails from "./pages/admin/UpdateUserDetails";
 import AdminProfile from "./pages/admin/AdminProfile";
 
 // Order Pages
-import BuyNowPage from "./pages/BuyNowPage";
 import OrderFormPage from "./pages/OrderFormPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
 
@@ -84,7 +83,7 @@ const AppContent = () => {
         <Route path="/fashions" element={<FashionPage />} />
         <Route path="/home&tv" element={<HomeAndTv />} />
         <Route path="/grocery" element={<GroceryPage />} />
-        <Route path="/order" element={<OrderFormPage />} />
+
         <Route path="/order-success" element={<OrderSuccessPage />} />
 
         {/* Private Routes */}
@@ -117,6 +116,14 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <Query />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/order"
+          element={
+            <PrivateRoute>
+              <OrderFormPage />
             </PrivateRoute>
           }
         />

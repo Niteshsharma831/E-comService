@@ -307,19 +307,31 @@ const clearCart = async (req, res) => {
 
 const createOrder = async (req, res) => {
   try {
+    const userId = req.userId;
+
     const {
-      items, // <-- array of products: [{ productId, quantity }]
       fullName,
       gender,
       phone,
       address,
       pincode,
       paymentMethod,
+      items, // optional
     } = req.body;
 
+    console.log("👉 Received order from user:", userId);
+    console.log("📦 Payload:", {
+      fullName,
+      gender,
+      phone,
+      address,
+      pincode,
+      paymentMethod,
+      items,
+    });
+
+    // ✅ Validate fields
     if (
-      !items ||
-      items.length === 0 ||
       !fullName ||
       !gender ||
       !phone ||
@@ -327,25 +339,66 @@ const createOrder = async (req, res) => {
       !pincode ||
       !paymentMethod
     ) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: "All fields are required." });
     }
 
-    const newOrder = new Order({
-      userId: req.userId,
-      items,
+    let orderItems = [];
+
+    if (items && items.length > 0) {
+      // ✅ Validate item structure
+      const invalidItem = items.find(
+        (item) => !item.productId || !item.quantity
+      );
+      if (invalidItem) {
+        return res
+          .status(400)
+          .json({ message: "Each item must have productId and quantity." });
+      }
+
+      orderItems = items;
+    } else {
+      // 🛒 Use cart items
+      const user = await User.findById(userId).populate("cart.productId");
+
+      if (!user || user.cart.length === 0) {
+        return res
+          .status(400)
+          .json({ message: "Cart is empty. Cannot place order." });
+      }
+
+      orderItems = user.cart.map((item) => ({
+        productId: item.productId._id,
+        quantity: item.quantity,
+      }));
+    }
+
+    // ✅ Create the order
+    const newOrder = await Order.create({
+      userId,
       fullName,
       gender,
       phone,
       address,
       pincode,
       paymentMethod,
+      items: orderItems,
     });
 
-    await newOrder.save();
-    res.status(201).json({ message: "Order placed", order: newOrder });
+    // ✅ Clear cart only if not a "Buy Now" order
+    if (!items || items.length === 0) {
+      await User.findByIdAndUpdate(userId, { $set: { cart: [] } });
+    }
+
+    console.log("✅ Order created:", newOrder._id);
+
+    res
+      .status(201)
+      .json({ message: "Order placed successfully", order: newOrder });
   } catch (error) {
-    console.error("Order error:", error.message);
-    res.status(500).json({ message: "Server error" });
+    console.error("❌ Order error:", error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong while placing order." });
   }
 };
 

@@ -6,7 +6,6 @@ import CategoryBar from "../Cards/CategoryBar";
 import ChatBot from "../components/ChatBot";
 import Banner from "../../public/banner.png";
 
-
 const Home = () => {
   return (
     <div className="bg-gray-100 text-gray-800 font-sans py-45">
@@ -40,13 +39,12 @@ const Home = () => {
       </section>
 
       {/* CATEGORY NAVIGATION */}
-      <section className="bg-white border-t border-gray-200">
+      <section className="bg-white border-t border-gray-200 hidden sm:block">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-xl font-bold mb-4">Top Categories</h2>
           <CategoryBar />
         </div>
       </section>
-
       {/* DEALS */}
       <section className="p max-w-7xl mx-auto space-y-12">
         <SmartphoneDeals />

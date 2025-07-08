@@ -1,60 +1,153 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 
-const OrderPage = () => {
-  const [orders, setOrders] = useState([]);
+const OrderFormPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const product = location.state?.product;
+
+  const [form, setForm] = useState({
+    fullName: "",
+    gender: "Male",
+    phone: "",
+    address: "",
+    pincode: "",
+    paymentMethod: "COD",
+  });
 
   useEffect(() => {
-    const fetchMyOrders = async () => {
-      try {
-        const res = await axios.get("https://e-comservice.onrender.com/api/orders/mine", {
-          withCredentials: true,
-        });
-        setOrders(res.data.orders);
-      } catch (err) {
-        console.error("Error fetching orders:", err.message);
-      }
-    };
-
-    fetchMyOrders();
+    // Prefill user details if logged in
+    axios
+      .get("https://e-comservice.onrender.com/api/users/profile", {
+        withCredentials: true,
+      })
+      .then((res) => {
+        const { name, gender, phone, address } = res.data.user;
+        setForm((prev) => ({
+          ...prev,
+          fullName: name || "",
+          gender: gender || "Male",
+          phone: phone || "",
+          address: address || "",
+        }));
+      })
+      .catch(() => {
+        // Ignore if not logged in or failed
+      });
   }, []);
 
-  return (
-    <div className="mt-24 px-6 py-8">
-      <h1 className="text-2xl font-bold mb-6">🧾 My Orders</h1>
-      {orders.length === 0 ? (
-        <p>No orders found.</p>
-      ) : (
-        orders.map((order, i) => (
-          <div
-            key={order._id}
-            className="mb-6 border p-4 rounded bg-white shadow"
-          >
-            <h2 className="font-semibold text-lg text-green-600">
-              Order #{i + 1}
-            </h2>
-            <p>
-              Status: <span className="text-blue-600">{order.status}</span>
-            </p>
-            <p>Payment: {order.paymentMethod}</p>
-            <p>
-              Address: {order.address}, {order.pincode}
-            </p>
-            <p>Ordered on: {new Date(order.createdAt).toLocaleString()}</p>
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
-            <h3 className="mt-2 font-medium">Items:</h3>
-            <ul className="list-disc ml-6">
-              {order.items.map((item) => (
-                <li key={item.productId?._id}>
-                  {item.productId?.name} × {item.quantity}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))
-      )}
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!product) {
+      toast.error("No product selected.");
+      return;
+    }
+
+    const orderPayload = {
+      ...form,
+      items: [{ productId: product._id, quantity: 1 }],
+    };
+
+    try {
+      const res = await axios.post(
+        "https://e-comservice.onrender.com/api/users/create-order",
+        orderPayload,
+        { withCredentials: true }
+      );
+
+      toast.success("✅ Order placed!");
+      navigate("/order-success");
+    } catch (err) {
+      toast.error("❌ Failed to place order.");
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="mt-24 min-h-screen px-6 py-8 bg-gray-100">
+      <div className="max-w-xl mx-auto bg-white p-8 shadow-md rounded">
+        <h2 className="text-2xl font-bold mb-6 text-green-700">
+          🛒 Delivery Details
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            name="fullName"
+            placeholder="Full Name"
+            value={form.fullName}
+            onChange={handleChange}
+            required
+            className="w-full border p-2 rounded"
+          />
+
+          <select
+            name="gender"
+            value={form.gender}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          >
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+
+          <input
+            type="tel"
+            name="phone"
+            placeholder="Phone"
+            value={form.phone}
+            onChange={handleChange}
+            required
+            className="w-full border p-2 rounded"
+          />
+
+          <textarea
+            name="address"
+            placeholder="Address"
+            value={form.address}
+            onChange={handleChange}
+            required
+            className="w-full border p-2 rounded"
+          />
+
+          <input
+            type="text"
+            name="pincode"
+            placeholder="Pincode"
+            value={form.pincode}
+            onChange={handleChange}
+            required
+            className="w-full border p-2 rounded"
+          />
+
+          <select
+            name="paymentMethod"
+            value={form.paymentMethod}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          >
+            <option value="COD">Cash on Delivery</option>
+            <option value="Online">Online Payment (Coming Soon)</option>
+          </select>
+
+          <button
+            type="submit"
+            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+          >
+            ✅ Place Order
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
 
-export default OrderPage;
+export default OrderFormPage;
