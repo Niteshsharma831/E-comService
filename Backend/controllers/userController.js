@@ -442,8 +442,8 @@ const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ message: "Order not found." });
     }
 
-    // Only the user who created the order can update it
-    if (order.user.toString() !== req.userId) {
+    // Allow only the user who placed the order to cancel it
+    if (order.userId.toString() !== req.userId) {
       return res.status(403).json({ message: "Unauthorized action." });
     }
 
@@ -452,7 +452,7 @@ const updateOrderStatus = async (req, res) => {
 
     res.status(200).json({
       message: `Order ${
-        status === "Canceled" ? "canceled" : "updated"
+        status === "Cancelled" ? "cancelled" : "updated"
       } successfully.`,
       order,
     });
