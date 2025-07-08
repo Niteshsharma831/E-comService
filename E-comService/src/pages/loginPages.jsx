@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const LoginPages = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // 👁️
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -18,34 +18,31 @@ const LoginPages = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       const res = await axios.post(
         "https://e-comservice.onrender.com/api/users/login",
         formData,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
 
       const user = res.data.user;
       localStorage.setItem("user", JSON.stringify(user));
       window.dispatchEvent(new Event("user-logged-in"));
-      console.log("Login successful:", user);
-
       toast.success("🟢 Login successful!");
       setTimeout(() => navigate("/"), 1500);
     } catch (err) {
+      console.error(err);
       setError("Invalid email or password");
       toast.error("❌ Invalid email or password");
-      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="h-screen flex flex-col md:flex-row items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200 px-4">
-      <ToastContainer position="top-right" autoClose={2000} />
-
       {/* Left Side – Logo/Image */}
       <div className="md:w-1/2 w-full flex justify-center mb-6 md:mb-0">
         <img
@@ -101,12 +98,17 @@ const LoginPages = () => {
           {/* Error */}
           {error && <p className="text-red-600 text-sm">{error}</p>}
 
-          {/* Submit */}
+          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+            disabled={loading}
+            className={`w-full py-2 rounded-md text-white transition ${
+              loading
+                ? "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
 
           {/* Links */}
