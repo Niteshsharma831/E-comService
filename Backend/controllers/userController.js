@@ -316,11 +316,11 @@ const createOrder = async (req, res) => {
       address,
       pincode,
       paymentMethod,
-      items, // optional
+      items,
     } = req.body;
 
-    console.log("👉 Received order from user:", userId);
-    console.log("📦 Payload:", {
+    console.log("Incoming Order Data:", {
+      userId,
       fullName,
       gender,
       phone,
@@ -330,40 +330,18 @@ const createOrder = async (req, res) => {
       items,
     });
 
-    // ✅ Validate fields
-    if (
-      !fullName ||
-      !gender ||
-      !phone ||
-      !address ||
-      !pincode ||
-      !paymentMethod
-    ) {
+    if (!fullName || !gender || !phone || !address || !pincode || !paymentMethod) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
     let orderItems = [];
 
     if (items && items.length > 0) {
-      // ✅ Validate item structure
-      const invalidItem = items.find(
-        (item) => !item.productId || !item.quantity
-      );
-      if (invalidItem) {
-        return res
-          .status(400)
-          .json({ message: "Each item must have productId and quantity." });
-      }
-
       orderItems = items;
     } else {
-      // 🛒 Use cart items
       const user = await User.findById(userId).populate("cart.productId");
-
       if (!user || user.cart.length === 0) {
-        return res
-          .status(400)
-          .json({ message: "Cart is empty. Cannot place order." });
+        return res.status(400).json({ message: "Cart is empty. Cannot place order." });
       }
 
       orderItems = user.cart.map((item) => ({
@@ -372,7 +350,13 @@ const createOrder = async (req, res) => {
       }));
     }
 
-    // ✅ Create the order
+    // ✅ Validate each item
+    for (let i = 0; i < orderItems.length; i++) {
+      if (!orderItems[i].productId) {
+        return res.status(400).json({ message: "Invalid product in items." });
+      }
+    }
+
     const newOrder = await Order.create({
       userId,
       fullName,
@@ -384,21 +368,15 @@ const createOrder = async (req, res) => {
       items: orderItems,
     });
 
-    // ✅ Clear cart only if not a "Buy Now" order
     if (!items || items.length === 0) {
       await User.findByIdAndUpdate(userId, { $set: { cart: [] } });
     }
 
-    console.log("✅ Order created:", newOrder._id);
+    res.status(201).json({ message: "Order placed successfully", order: newOrder });
 
-    res
-      .status(201)
-      .json({ message: "Order placed successfully", order: newOrder });
   } catch (error) {
-    console.error("❌ Order error:", error);
-    res
-      .status(500)
-      .json({ message: "Something went wrong while placing order." });
+    console.error("Order error:", error.message);
+    res.status(500).json({ message: "Something went wrong while placing order." });
   }
 };
 
