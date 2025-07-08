@@ -50,11 +50,11 @@ const Navbar = () => {
       setUser(null);
       setMenuOpen(false);
       setShowDropdown(false);
-      toast.success("\ud83d\udfe2 Logged out successfully!");
+      toast.success("Logged out successfully!");
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
-      toast.error("\u274c Logout failed. Please try again.");
+      toast.error("Logout failed. Please try again.");
     }
   };
 
@@ -75,7 +75,7 @@ const Navbar = () => {
               to="/"
               className="flex items-center text-blue-600 font-bold text-xl"
             >
-              \ud83d\udecd\ufe0f Shopizo
+              Shopizo
             </Link>
             <button
               className="md:hidden"
@@ -91,9 +91,8 @@ const Navbar = () => {
               scrollAmount="5"
               className="text-sm text-gray-800 font-medium"
             >
-              \ud83c\udf89 Big Discounts This Week! | \ud83d\ude9a Free Shipping
-              on All Orders | \ud83d\udcb3 Pay on Delivery | \ud83d\udd25 New
-              Offers Every Day!
+              Big Discounts This Week! | Free Shipping on All Orders | Pay on
+              Delivery | New Offers Every Day!
             </marquee>
           </div>
         </div>
@@ -118,7 +117,7 @@ const Navbar = () => {
 
         {user && (
           <div className="hidden md:block text-sm font-semibold text-gray-600 whitespace-nowrap">
-            \ud83d\udc4b Welcome,{" "}
+            Welcome,{" "}
             <span className="text-blue-700">{getFirstName(user.name)}</span>
           </div>
         )}
@@ -216,7 +215,7 @@ const Navbar = () => {
                   onClick={() => setShowDropdown(!showDropdown)}
                   className="block w-full text-left px-3 py-2 bg-gray-100 rounded"
                 >
-                  \ud83d\udc64 Profile
+                  Profile
                 </button>
               </li>
               {showDropdown && (
