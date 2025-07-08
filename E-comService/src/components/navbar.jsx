@@ -71,10 +71,7 @@ const Navbar = () => {
       <div className="max-w-screen-xl mx-auto px-4 space-y-2 md:space-y-0 md:flex md:items-center md:justify-between">
         <div className="w-full md:w-auto">
           <div className="flex justify-between items-center">
-            <Link
-              to="/"
-              className="flex items-center text-blue-600 font-bold text-xl"
-            >
+            <Link to="/" className="text-blue-600 font-bold text-xl">
               Shopizo
             </Link>
             <button
@@ -83,17 +80,6 @@ const Navbar = () => {
             >
               {menuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
             </button>
-          </div>
-          <div className="rounded overflow-hidden">
-            <marquee
-              behavior="scroll"
-              direction="left"
-              scrollAmount="5"
-              className="text-sm text-gray-800 font-medium"
-            >
-              Big Discounts This Week! | Free Shipping on All Orders | Pay on
-              Delivery | New Offers Every Day!
-            </marquee>
           </div>
         </div>
 
@@ -127,18 +113,21 @@ const Navbar = () => {
       <div className="max-w-screen-xl mx-auto px-4 py-2 flex items-center justify-between">
         <ul className="hidden md:flex space-x-6 items-center font-medium w-full justify-center">
           {[
-            ["/", "Home"],
-            ["/shop", "Shop"],
-            ["/electronic", "Electronic"],
-            ["/home&tv", "Home & TV"],
-            ["/fashions", "Fashions"],
-            ["/grocery", "Grocery"],
-          ].map(([path, label], idx) => (
+            "/",
+            "/shop",
+            "/electronic",
+            "/home&tv",
+            "/fashions",
+            "/grocery",
+          ].map((path, idx) => (
             <li key={idx}>
-              <Link to={path}>{label}</Link>
+              <Link to={path}>
+                {path === "/"
+                  ? "Home"
+                  : path.replace("/", "").replace("&", " & ")}
+              </Link>
             </li>
           ))}
-
           {user ? (
             <li className="relative" ref={dropdownRef}>
               <button
@@ -148,55 +137,27 @@ const Navbar = () => {
                 Profile
               </button>
               {showDropdown && (
-                <div className="ml-2 space-y-1">
-                  <li>
-                    <button
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setShowDropdown(false);
-                        navigate("/account");
-                      }}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                <div className="absolute right-0 mt-2 w-44 bg-white rounded shadow-md z-10">
+                  {["/account", "/cart", "/my-orders"].map((path, idx) => (
+                    <Link
+                      key={idx}
+                      to={path}
+                      className="block px-4 py-2 hover:bg-blue-50"
+                      onClick={() => setShowDropdown(false)}
                     >
-                      My Account
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setShowDropdown(false);
-                        navigate("/cart");
-                      }}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                    >
-                      My Cart
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setShowDropdown(false);
-                        navigate("/my-orders");
-                      }}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                    >
-                      My Orders
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setShowDropdown(false);
-                        handleLogout();
-                      }}
-                      className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
-                    >
-                      Logout
-                    </button>
-                  </li>
+                      {path === "/account"
+                        ? "My Account"
+                        : path === "/cart"
+                        ? "My Cart"
+                        : "My Orders"}
+                    </Link>
+                  ))}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
+                  >
+                    Logout
+                  </button>
                 </div>
               )}
             </li>
@@ -217,16 +178,18 @@ const Navbar = () => {
       {menuOpen && (
         <ul className="md:hidden px-4 pb-4 space-y-2 font-medium bg-white shadow-md">
           {[
-            ["/", "Home"],
-            ["/shop", "Shop"],
-            ["/electronic", "Electronic"],
-            ["/home&tv", "Home & TV"],
-            ["/fashions", "Fashions"],
-            ["/grocery", "Grocery"],
-          ].map(([path, label], idx) => (
+            "/",
+            "/shop",
+            "/electronic",
+            "/home&tv",
+            "/fashions",
+            "/grocery",
+          ].map((path, idx) => (
             <li key={idx}>
               <Link to={path} onClick={() => setMenuOpen(false)}>
-                {label}
+                {path === "/"
+                  ? "Home"
+                  : path.replace("/", "").replace("&", " & ")}
               </Link>
             </li>
           ))}
@@ -243,47 +206,29 @@ const Navbar = () => {
               </li>
               {showDropdown && (
                 <div className="ml-2 space-y-1">
-                  <li>
-                    <Link
-                      to="/account"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setShowDropdown(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                    >
-                      My Account
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/cart"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setShowDropdown(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                    >
-                      My Cart
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/my-orders"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setShowDropdown(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                    >
-                      My Orders
-                    </Link>
-                  </li>
+                  {["/account", "/cart", "/my-orders"].map((path, idx) => (
+                    <li key={idx}>
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          setMenuOpen(false);
+                          navigate(path);
+                        }}
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      >
+                        {path === "/account"
+                          ? "My Account"
+                          : path === "/cart"
+                          ? "My Cart"
+                          : "My Orders"}
+                      </button>
+                    </li>
+                  ))}
                   <li>
                     <button
                       onClick={() => {
-                        setMenuOpen(false);
                         setShowDropdown(false);
+                        setMenuOpen(false);
                         handleLogout();
                       }}
                       className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
