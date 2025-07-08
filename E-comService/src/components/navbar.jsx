@@ -179,7 +179,7 @@ const Navbar = () => {
                     My Cart
                   </Link>
                   <Link
-                    to="/orders"
+                    to="/my-orders"
                     className="block px-4 py-2 hover:bg-blue-50"
                     onClick={() => setShowDropdown(false)}
                   >
@@ -270,7 +270,7 @@ const Navbar = () => {
                 <button
                   onClick={() => {
                     setMenuOpen(false);
-                    navigate("/orders");
+                    navigate("/my-orders");
                   }}
                   className="block w-full text-left px-3 py-1"
                 >
