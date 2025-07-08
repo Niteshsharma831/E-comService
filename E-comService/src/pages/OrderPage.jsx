@@ -8,7 +8,7 @@ const MyOrdersPage = () => {
 
   useEffect(() => {
     axios
-      .get("https://e-comservice.onrender.com/api/users/my-orders", {
+      .get("https://e-comservice.onrender.com/api/users/mine", {
         withCredentials: true,
       })
       .then((res) => {
@@ -54,7 +54,7 @@ const MyOrdersPage = () => {
                   <td className="p-3 text-green-600 font-semibold">
                     {order.status}
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 space-y-1">
                     {order.items.map((item, i) => (
                       <div key={i}>
                         <p>
