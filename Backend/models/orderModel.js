@@ -33,7 +33,7 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Processing", "Confirmed", "Delivered", "Cancelled"],
+      enum: ["Processing", "Confirmed", "Delivered", "Cancelled"], // 👈 "Cancelled" is the correct spelling
       default: "Processing",
     },
   },

@@ -28,10 +28,10 @@ const MyOrdersPage = () => {
     try {
       await axios.put(
         `https://e-comservice.onrender.com/api/orders/update-status/${orderId}`,
-        { status: "Canceled" },
+        { status: "Cancelled" }, // ✅ Correct spelling here
         { withCredentials: true }
       );
-      toast.success("✅ Order canceled successfully");
+      toast.success("✅ Order cancelled successfully");
       fetchOrders(); // Refresh orders
     } catch (err) {
       toast.error("❌ Failed to cancel order");
@@ -71,8 +71,8 @@ const MyOrdersPage = () => {
                   <td className="p-3">{order.address}</td>
                   <td className="p-3">{order.paymentMethod}</td>
                   <td className="p-3 font-semibold text-sm">
-                    {order.status === "Canceled" ? (
-                      <span className="text-red-500">Canceled</span>
+                    {order.status === "Cancelled" ? (
+                      <span className="text-red-500">Cancelled</span>
                     ) : (
                       <span className="text-green-600">Order Success</span>
                     )}
@@ -100,7 +100,7 @@ const MyOrdersPage = () => {
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                   <td className="p-3">
-                    {order.status === "Canceled" ? (
+                    {order.status === "Cancelled" ? (
                       <span className="text-gray-400 text-xs">No Action</span>
                     ) : (
                       <button
