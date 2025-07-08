@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaBars, FaTimes, FaSearch } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  FaBars,
+  FaTimes,
+  FaUser,
+  FaShoppingCart,
+  FaSearch,
+} from "react-icons/fa";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -8,7 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef();
   const navigate = useNavigate();
@@ -29,7 +35,7 @@ const Navbar = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
+        setDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -46,10 +52,10 @@ const Navbar = () => {
         { withCredentials: true }
       );
       localStorage.removeItem("user");
-      window.dispatchEvent(new Event("user-logged-in"));
       setUser(null);
       setMenuOpen(false);
-      setShowDropdown(false);
+      setDropdownOpen(false);
+      window.dispatchEvent(new Event("user-logged-in"));
       toast.success("Logged out successfully!");
       navigate("/login");
     } catch (err) {
@@ -66,191 +72,184 @@ const Navbar = () => {
     }
   };
 
+  const menuItems = [
+    { label: "Home", path: "/" },
+    { label: "Shop", path: "/shop" },
+    { label: "Electronic", path: "/electronic" },
+    { label: "Home & TV", path: "/home&tv" },
+    { label: "Fashions", path: "/fashions" },
+    { label: "Grocery", path: "/grocery" },
+  ];
+
   return (
-    <nav className="bg-white shadow-md fixed top-0 left-0 w-full z-50 p-1">
-      <div className="max-w-screen-xl mx-auto px-4 space-y-2 md:space-y-0 md:flex md:items-center md:justify-between">
-        <div className="w-full md:w-auto">
-          <div className="flex justify-between items-center">
-            <Link to="/" className="text-blue-600 font-bold text-xl">
-              Shopizo
-            </Link>
-            <button
-              className="md:hidden"
-              onClick={() => setMenuOpen(!menuOpen)}
-            >
-              {menuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
-            </button>
-          </div>
-        </div>
+    <nav className="bg-white shadow-md fixed w-full z-50">
+      <div className="max-w-screen-xl mx-auto flex justify-between items-center px-4 py-3">
+        <Link to="/" className="text-2xl font-bold text-indigo-600">
+          Shopizo
+        </Link>
 
         <form
           onSubmit={handleSearchSubmit}
-          className="w-full md:w-1/2 mt-2 md:mt-0"
+          className="hidden md:flex relative w-1/2 max-w-lg"
         >
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-              <FaSearch />
-            </span>
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search for products..."
+            className="w-full pl-10 pr-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
         </form>
 
-        {user && (
-          <div className="hidden md:block text-sm font-semibold text-gray-600 whitespace-nowrap">
-            Welcome,{" "}
-            <span className="text-blue-700">{getFirstName(user.name)}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Desktop Menu */}
-      <div className="max-w-screen-xl mx-auto px-4 py-2 flex items-center justify-between">
-        <ul className="hidden md:flex space-x-6 items-center font-medium w-full justify-center">
-          {[
-            "/",
-            "/shop",
-            "/electronic",
-            "/home&tv",
-            "/fashions",
-            "/grocery",
-          ].map((path, idx) => (
-            <li key={idx}>
-              <Link to={path}>
-                {path === "/"
-                  ? "Home"
-                  : path.replace("/", "").replace("&", " & ")}
-              </Link>
-            </li>
-          ))}
-          {user ? (
-            <li className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="px-3 py-1 text-blue-600 hover:bg-blue-50 focus:outline-none"
+        <div className="flex items-center gap-3">
+          <div className="hidden md:flex gap-4">
+            {menuItems.map((item, index) => (
+              <Link
+                key={index}
+                to={item.path}
+                className="hover:text-indigo-600 font-medium"
               >
-                Profile
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
+          {user ? (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                className="flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-800"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <FaUser /> {getFirstName(user.name)}
               </button>
-              {showDropdown && (
-                <div className="absolute right-0 mt-2 w-44 bg-white rounded shadow-md z-10">
-                  {["/account", "/cart", "/my-orders"].map((path, idx) => (
-                    <Link
-                      key={idx}
-                      to={path}
-                      className="block px-4 py-2 hover:bg-blue-50"
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      {path === "/account"
-                        ? "My Account"
-                        : path === "/cart"
-                        ? "My Cart"
-                        : "My Orders"}
-                    </Link>
-                  ))}
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-44 bg-white shadow-md rounded z-50">
+                  <Link
+                    to="/account"
+                    className="block px-4 py-2 hover:bg-indigo-50"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setDropdownOpen(false);
+                    }}
+                  >
+                    My Account
+                  </Link>
+                  <Link
+                    to="/cart"
+                    className="block px-4 py-2 hover:bg-indigo-50"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setDropdownOpen(false);
+                    }}
+                  >
+                    My Cart
+                  </Link>
+                  <Link
+                    to="/my-orders"
+                    className="block px-4 py-2 hover:bg-indigo-50"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setDropdownOpen(false);
+                    }}
+                  >
+                    My Orders
+                  </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
+                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
                   >
                     Logout
                   </button>
                 </div>
               )}
-            </li>
+            </div>
           ) : (
-            <li>
-              <Link
-                to="/login"
-                className="px-3 py-1 bg-blue-600 text-white rounded"
-              >
-                Login
-              </Link>
-            </li>
+            <Link
+              to="/login"
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+            >
+              Login
+            </Link>
           )}
-        </ul>
+
+          <button
+            className="md:hidden text-xl text-indigo-600"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? <FaTimes /> : <FaBars />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <ul className="md:hidden px-4 pb-4 space-y-2 font-medium bg-white shadow-md">
-          {[
-            "/",
-            "/shop",
-            "/electronic",
-            "/home&tv",
-            "/fashions",
-            "/grocery",
-          ].map((path, idx) => (
-            <li key={idx}>
-              <Link to={path} onClick={() => setMenuOpen(false)}>
-                {path === "/"
-                  ? "Home"
-                  : path.replace("/", "").replace("&", " & ")}
-              </Link>
-            </li>
+        <div className="md:hidden bg-white px-4 py-2 shadow-md space-y-2">
+          <form onSubmit={handleSearchSubmit} className="relative">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search for products..."
+              className="w-full pl-10 pr-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </form>
+
+          {menuItems.map((item, index) => (
+            <Link
+              key={index}
+              to={item.path}
+              onClick={() => setMenuOpen(false)}
+              className="block px-2 py-2 hover:bg-gray-100 rounded"
+            >
+              {item.label}
+            </Link>
           ))}
 
           {user ? (
             <>
-              <li>
-                <button
-                  onClick={() => setShowDropdown(!showDropdown)}
-                  className="block w-full text-left px-3 py-2 bg-gray-100 rounded"
-                >
-                  Profile
-                </button>
-              </li>
-              {showDropdown && (
-                <div className="ml-2 space-y-1">
-                  {["/account", "/cart", "/my-orders"].map((path, idx) => (
-                    <li key={idx}>
-                      <button
-                        onClick={() => {
-                          setShowDropdown(false);
-                          setMenuOpen(false);
-                          navigate(path);
-                        }}
-                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                      >
-                        {path === "/account"
-                          ? "My Account"
-                          : path === "/cart"
-                          ? "My Cart"
-                          : "My Orders"}
-                      </button>
-                    </li>
-                  ))}
-                  <li>
-                    <button
-                      onClick={() => {
-                        setShowDropdown(false);
-                        setMenuOpen(false);
-                        handleLogout();
-                      }}
-                      className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
-                    >
-                      Logout
-                    </button>
-                  </li>
-                </div>
-              )}
+              <Link
+                to="/account"
+                onClick={() => setMenuOpen(false)}
+                className="block px-2 py-2 hover:bg-gray-100 rounded"
+              >
+                My Account
+              </Link>
+              <Link
+                to="/cart"
+                onClick={() => setMenuOpen(false)}
+                className="block px-2 py-2 hover:bg-gray-100 rounded"
+              >
+                My Cart
+              </Link>
+              <Link
+                to="/my-orders"
+                onClick={() => setMenuOpen(false)}
+                className="block px-2 py-2 hover:bg-gray-100 rounded"
+              >
+                My Orders
+              </Link>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleLogout();
+                }}
+                className="w-full text-left px-2 py-2 text-red-600 hover:bg-red-100 rounded"
+              >
+                Logout
+              </button>
             </>
           ) : (
-            <li>
-              <Link
-                to="/login"
-                onClick={() => setMenuOpen(false)}
-                className="block bg-blue-600 text-white rounded px-3 py-1 w-fit"
-              >
-                Login
-              </Link>
-            </li>
+            <Link
+              to="/login"
+              onClick={() => setMenuOpen(false)}
+              className="block px-2 py-2 bg-indigo-600 text-white rounded text-center"
+            >
+              Login
+            </Link>
           )}
-        </ul>
+        </div>
       )}
 
       <ToastContainer position="top-right" autoClose={2000} hideProgressBar />
