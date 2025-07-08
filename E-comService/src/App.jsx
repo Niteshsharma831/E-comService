@@ -28,7 +28,7 @@ import SmartPhones from "./pages/SmartPhones";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import Query from "./pages/Query";
 
-// Admin
+// Admin Pages
 import Dashboard from "./pages/admin/Dashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import ProductPublish from "./pages/admin/ProductPublish";
@@ -40,19 +40,32 @@ import UpdateProductForm from "./pages/admin/UpdateProductForm";
 import CreateAdmin from "./pages/admin/CreateAdmin";
 import UpdateUserDetails from "./pages/admin/UpdateUserDetails";
 import AdminProfile from "./pages/admin/AdminProfile";
+
+// Order Pages
 import BuyNowPage from "./pages/BuyNowPage";
 import OrderFormPage from "./pages/OrderFormPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
-import ScrollToTop from "./hooks/ScrollToTop";
+import Maintenance from "./components/Maintenance";
 
-// Utility
+// Utilities
+// import ScrollToTop from "./hooks/ScrollToTop";
+// import Maintenance from "./pages/Maintenance"; // ✅ Maintenance page
+
+// Helper Hook to Detect Admin Route
 const useIsAdminRoute = () => {
   const location = useLocation();
   return location.pathname.startsWith("/admin");
 };
 
+// Main Routing Component
 const AppContent = () => {
   const isAdmin = useIsAdminRoute();
+  const maintenanceMode = process.env.REACT_APP_MAINTENANCE === "true";
+
+  // ✅ Show Maintenance Page for normal users
+  if (maintenanceMode && !isAdmin) {
+    return <Maintenance />;
+  }
 
   return (
     <>
@@ -108,6 +121,7 @@ const AppContent = () => {
             </PrivateRoute>
           }
         />
+
         {/* Admin Routes */}
         <Route
           path="/admin/dashboard"
@@ -188,6 +202,7 @@ const AppContent = () => {
   );
 };
 
+// Main App
 const App = () => (
   <Router>
     <AppContent />
