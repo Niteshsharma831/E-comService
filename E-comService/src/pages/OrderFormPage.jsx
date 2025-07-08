@@ -186,7 +186,7 @@ const OrderFormPage = () => {
 
             <textarea
               name="address"
-              placeholder="Delivery Address"
+              placeholder="Delivery Full Address"
               value={form.address}
               onChange={handleChange}
               required
