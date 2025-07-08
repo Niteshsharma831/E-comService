@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
@@ -39,7 +38,6 @@ const Navbar = () => {
   }, []);
 
   const getFirstName = (name) => name?.split(" ")[0];
-
   const handleLogout = async () => {
     try {
       await axios.post(
@@ -48,13 +46,16 @@ const Navbar = () => {
         { withCredentials: true }
       );
 
+      // Clear local data
       localStorage.removeItem("user");
       window.dispatchEvent(new Event("user-logged-in"));
-      setUser(null);
-      setMenuOpen(false);
-      setShowDropdown(false);
 
-      toast.success("🟢 Logged out successfully!");
+      setUser(null); // ✅ Clear local state
+      setMenuOpen(false); // ✅ Close mobile menu
+      setShowDropdown(false); // ✅ Close dropdown
+
+      toast.success("🟢 Logged out successfully!"); // ✅ Toast message
+
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
@@ -72,8 +73,10 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-md fixed top-0 left-0 w-full z-50 p-1">
+      {/* Top Row */}
       <div className="max-w-screen-xl mx-auto px-4 space-y-2 md:space-y-0 md:flex md:items-center md:justify-between">
         <div className="w-full md:w-auto">
+          {/* Brand */}
           <div className="flex justify-between items-center">
             <Link
               to="/"
@@ -89,6 +92,7 @@ const Navbar = () => {
             </button>
           </div>
 
+          {/* Marquee outside of <Link> */}
           <div className="rounded overflow-hidden">
             <marquee
               behavior="scroll"
@@ -121,65 +125,14 @@ const Navbar = () => {
         </form>
 
         {user && (
-          <>
-            <li>
-              <button
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="block w-full text-left px-3 py-2 bg-gray-100 rounded"
-              >
-                👤 Profile
-              </button>
-            </li>
-
-            {showDropdown && (
-              <div className="ml-4 mt-1 space-y-1">
-                <button
-                  onClick={() => {
-                    setShowDropdown(false);
-                    setMenuOpen(false);
-                    setTimeout(() => navigate("/account"), 100);
-                  }}
-                  className="block w-full text-left px-4 py-2 rounded hover:bg-gray-100"
-                >
-                  My Account
-                </button>
-                <button
-                  onClick={() => {
-                    setShowDropdown(false);
-                    setMenuOpen(false);
-                    setTimeout(() => navigate("/cart"), 100);
-                  }}
-                  className="block w-full text-left px-4 py-2 rounded hover:bg-gray-100"
-                >
-                  My Cart
-                </button>
-                <button
-                  onClick={() => {
-                    setShowDropdown(false);
-                    setMenuOpen(false);
-                    setTimeout(() => navigate("/my-orders"), 100);
-                  }}
-                  className="block w-full text-left px-4 py-2 rounded hover:bg-gray-100"
-                >
-                  My Orders
-                </button>
-                <button
-                  onClick={() => {
-                    setShowDropdown(false);
-                    setMenuOpen(false);
-                    handleLogout();
-                  }}
-                  className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </>
+          <div className="hidden md:block text-sm font-semibold text-gray-600 whitespace-nowrap">
+            👋 Welcome,{" "}
+            <span className="text-blue-700">{getFirstName(user.name)}</span>
+          </div>
         )}
       </div>
 
-      {/* Desktop Menu */}
+      {/* Bottom Menu Desktop */}
       <div className="max-w-screen-xl mx-auto px-4 py-2 flex items-center justify-between">
         <ul className="hidden md:flex space-x-6 items-center font-medium w-full justify-center">
           <li>
@@ -255,6 +208,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
+      {/* Mobile Menu */}
       {menuOpen && (
         <ul className="md:hidden px-4 pb-4 space-y-2 font-medium bg-white shadow-md">
           <li>
@@ -304,7 +258,7 @@ const Navbar = () => {
                       onClick={() => {
                         setMenuOpen(false);
                         setShowDropdown(false);
-                        setTimeout(() => navigate("/account"), 100);
+                        navigate("/account");
                       }}
                       className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                     >
@@ -314,7 +268,7 @@ const Navbar = () => {
                       onClick={() => {
                         setMenuOpen(false);
                         setShowDropdown(false);
-                        setTimeout(() => navigate("/cart"), 100);
+                        navigate("/cart");
                       }}
                       className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                     >
@@ -324,7 +278,7 @@ const Navbar = () => {
                       onClick={() => {
                         setMenuOpen(false);
                         setShowDropdown(false);
-                        setTimeout(() => navigate("/my-orders"), 100);
+                        navigate("/my-orders");
                       }}
                       className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                     >
@@ -332,9 +286,9 @@ const Navbar = () => {
                     </button>
                     <button
                       onClick={() => {
+                        handleLogout();
                         setMenuOpen(false);
                         setShowDropdown(false);
-                        handleLogout();
                       }}
                       className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
                     >
