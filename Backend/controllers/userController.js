@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/userModel");
 const querySchema = require("../models/Query");
+const Order = require("../models/orderModel");
 
 const SECRET_KEY = process.env.JWT_SECRET;
 
@@ -309,7 +310,7 @@ const createOrder = async (req, res) => {
   try {
     const userId = req.userId;
     console.log("👉 UserID:", userId);
-    console.log("👉 Request Body:", req.body);
+    console.log("👉 Request Body:", JSON.stringify(req.body, null, 2));
 
     const { fullName, gender, phone, address, pincode, paymentMethod, items } =
       req.body;
@@ -327,26 +328,35 @@ const createOrder = async (req, res) => {
 
     let orderItems = [];
 
-    if (items && items.length > 0) {
-      // ✅ Convert productId to ObjectId
+    // Check if "Buy Now" items are provided
+    if (items && Array.isArray(items) && items.length > 0) {
+      // Validate all productIds
+      for (let item of items) {
+        if (!mongoose.Types.ObjectId.isValid(item.productId)) {
+          return res
+            .status(400)
+            .json({ message: `Invalid productId: ${item.productId}` });
+        }
+      }
+
       orderItems = items.map((item) => ({
         productId: new mongoose.Types.ObjectId(item.productId),
-        quantity: item.quantity,
+        quantity: item.quantity || 1,
       }));
     } else {
+      // Use items from user's cart
       const user = await User.findById(userId).populate("cart.productId");
-
-      if (!user || user.cart.length === 0) {
+      if (!user || !user.cart || user.cart.length === 0) {
         return res.status(400).json({ message: "Cart is empty." });
       }
 
       orderItems = user.cart.map((item) => ({
         productId: item.productId._id || item.productId,
-        quantity: item.quantity,
+        quantity: item.quantity || 1,
       }));
     }
 
-    console.log("🛒 Order Items:", orderItems);
+    console.log("🛒 Final Order Items:", orderItems);
 
     const newOrder = await Order.create({
       userId,
@@ -359,19 +369,25 @@ const createOrder = async (req, res) => {
       items: orderItems,
     });
 
+    // Clear user's cart if it was a cart-based order
     if (!items || items.length === 0) {
       await User.findByIdAndUpdate(userId, { $set: { cart: [] } });
     }
 
-    res.status(201).json({ message: "✅ Order placed!", order: newOrder });
+    console.log("✅ Order created:", newOrder._id);
+
+    return res.status(201).json({
+      message: "✅ Order placed!",
+      order: newOrder,
+    });
   } catch (error) {
-    console.error("❌ Order error:", error);
-    res
-      .status(500)
-      .json({ message: "Something went wrong while placing order." });
+    console.error("❌ Order Error:", error.message);
+    return res.status(500).json({
+      message: "Something went wrong while placing order.",
+      error: error.message,
+    });
   }
 };
-
 // ✅ Get Orders for Logged-in User
 const getMyOrders = async (req, res) => {
   try {

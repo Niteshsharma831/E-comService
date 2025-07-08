@@ -42,4 +42,6 @@ const orderSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Order", orderSchema);
+// ✅ Correct model name and schema reference
+const Order = mongoose.model("Order", orderSchema);
+module.exports = Order;
