@@ -436,14 +436,21 @@ const updateOrderStatus = async (req, res) => {
   const { status } = req.body;
   const orderId = req.params.id;
 
+  console.log("🟡 Received Order ID:", orderId);
+  console.log("🟡 Status to update:", status);
+
   try {
     const order = await Order.findById(orderId);
+
     if (!order) {
+      console.log("🔴 Order not found in DB.");
       return res.status(404).json({ message: "Order not found." });
     }
 
-    // Allow only the user who placed the order to cancel it
+    console.log("✅ Order found:", order._id);
+
     if (order.userId.toString() !== req.userId) {
+      console.log("🔒 Unauthorized user:", req.userId);
       return res.status(403).json({ message: "Unauthorized action." });
     }
 
@@ -457,7 +464,7 @@ const updateOrderStatus = async (req, res) => {
       order,
     });
   } catch (err) {
-    console.error("Error updating order status:", err.message);
+    console.error("❌ Error updating order status:", err.message);
     res.status(500).json({ message: "Failed to update order status." });
   }
 };
