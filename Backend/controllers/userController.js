@@ -389,7 +389,7 @@ const createOrder = async (req, res) => {
     });
   }
 };
-// ✅ Get Orders for Logged-in User
+
 const getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.userId }).populate(

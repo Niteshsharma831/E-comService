@@ -48,6 +48,7 @@ import OrderSuccessPage from "./pages/OrderSuccessPage";
 
 // Utilities
 import ScrollToTop from "./hooks/ScrollToTop";
+import MyOrdersPage from "./pages/OrderPage";
 
 // Helper Hook to Detect Admin Route
 const useIsAdminRoute = () => {
@@ -124,6 +125,14 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <OrderFormPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/my-orders"
+          element={
+            <PrivateRoute>
+              <MyOrdersPage />
             </PrivateRoute>
           }
         />

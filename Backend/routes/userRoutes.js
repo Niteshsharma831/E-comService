@@ -39,9 +39,12 @@ router.get("/cart", authMiddleware, getCart);
 router.delete("/cart/:productId", authMiddleware, removeFromCart);
 router.delete("/cart/clear", authMiddleware, clearCart);
 
+// Order routes
 router.post("/create-order", authMiddleware, createOrder);
 router.get("/mine", authMiddleware, getMyOrders);
-router.post("/query", authMiddleware, submitQuery); // User submits query
+
+// Queries
+router.post("/query", authMiddleware, submitQuery);
 router.get("/query", authMiddleware, getQueries);
 
 module.exports = router;
