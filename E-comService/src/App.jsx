@@ -1,14 +1,15 @@
 import React from "react";
-import { Analytics } from "@vercel/analytics/react";
-// import { SpeedInsights } from "@vercel/speed-insights/react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   useLocation,
 } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+// Optional: Vercel Analytics
+import { Analytics } from "@vercel/analytics/react";
 
 // Components & Pages
 import Navbar from "./components/navbar";
@@ -47,23 +48,22 @@ import AdminProfile from "./pages/admin/AdminProfile";
 // Order Pages
 import OrderFormPage from "./pages/OrderFormPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
+import MyOrdersPage from "./pages/OrderPage";
 
 // Utilities
 import ScrollToTop from "./hooks/ScrollToTop";
-import MyOrdersPage from "./pages/OrderPage";
 
-// Helper Hook to Detect Admin Route
+// ✅ Detect if on admin route
 const useIsAdminRoute = () => {
   const location = useLocation();
   return location.pathname.startsWith("/admin");
 };
 
-// Main Routing Component
 const AppContent = () => {
   const isAdmin = useIsAdminRoute();
   const maintenanceMode = process.env.REACT_APP_MAINTENANCE === "true";
 
-  // ✅ Show Maintenance Page for normal users
+  // ✅ Maintenance mode check
   if (maintenanceMode && !isAdmin) {
     return <Maintenance />;
   }
@@ -72,8 +72,8 @@ const AppContent = () => {
     <>
       <ScrollToTop />
       <Analytics />
-      {/* <SpeedInsights /> */}
       {!isAdmin && <Navbar />}
+
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
@@ -88,7 +88,6 @@ const AppContent = () => {
         <Route path="/fashions" element={<FashionPage />} />
         <Route path="/home&tv" element={<HomeAndTv />} />
         <Route path="/grocery" element={<GroceryPage />} />
-
         <Route path="/order-success" element={<OrderSuccessPage />} />
 
         {/* Private Routes */}
@@ -215,8 +214,20 @@ const AppContent = () => {
           }
         />
       </Routes>
+
       {!isAdmin && <Footer />}
-      <ToastContainer position="top-right" autoClose={2000} />
+
+      {/* ✅ Toast setup */}
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </>
   );
 };
