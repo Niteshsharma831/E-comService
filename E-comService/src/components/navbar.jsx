@@ -127,21 +127,18 @@ const Navbar = () => {
       <div className="max-w-screen-xl mx-auto px-4 py-2 flex items-center justify-between">
         <ul className="hidden md:flex space-x-6 items-center font-medium w-full justify-center">
           {[
-            "/",
-            "/shop",
-            "/electronic",
-            "/home&tv",
-            "/fashions",
-            "/grocery",
-          ].map((path, idx) => (
+            ["/", "Home"],
+            ["/shop", "Shop"],
+            ["/electronic", "Electronic"],
+            ["/home&tv", "Home & TV"],
+            ["/fashions", "Fashions"],
+            ["/grocery", "Grocery"],
+          ].map(([path, label], idx) => (
             <li key={idx}>
-              <Link to={path}>
-                {path === "/"
-                  ? "Home"
-                  : path.replace("/", "").replace("&", " & ")}
-              </Link>
+              <Link to={path}>{label}</Link>
             </li>
           ))}
+
           {user ? (
             <li className="relative" ref={dropdownRef}>
               <button
@@ -152,20 +149,27 @@ const Navbar = () => {
               </button>
               {showDropdown && (
                 <div className="absolute right-0 mt-2 w-44 bg-white rounded shadow-md z-10">
-                  {[
-                    ["/account", "My Account"],
-                    ["/cart", "My Cart"],
-                    ["/my-orders", "My Orders"],
-                  ].map(([path, label], i) => (
-                    <Link
-                      key={i}
-                      to={path}
-                      className="block px-4 py-2 hover:bg-blue-50"
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      {label}
-                    </Link>
-                  ))}
+                  <Link
+                    to="/account"
+                    className="block px-4 py-2 hover:bg-blue-50"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    My Account
+                  </Link>
+                  <Link
+                    to="/cart"
+                    className="block px-4 py-2 hover:bg-blue-50"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    My Cart
+                  </Link>
+                  <Link
+                    to="/my-orders"
+                    className="block px-4 py-2 hover:bg-blue-50"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    My Orders
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
@@ -192,18 +196,16 @@ const Navbar = () => {
       {menuOpen && (
         <ul className="md:hidden px-4 pb-4 space-y-2 font-medium bg-white shadow-md">
           {[
-            "/",
-            "/shop",
-            "/electronic",
-            "/home&tv",
-            "/fashions",
-            "/grocery",
-          ].map((path, idx) => (
+            ["/", "Home"],
+            ["/shop", "Shop"],
+            ["/electronic", "Electronic"],
+            ["/home&tv", "Home & TV"],
+            ["/fashions", "Fashions"],
+            ["/grocery", "Grocery"],
+          ].map(([path, label], idx) => (
             <li key={idx}>
               <Link to={path} onClick={() => setMenuOpen(false)}>
-                {path === "/"
-                  ? "Home"
-                  : path.replace("/", "").replace("&", " & ")}
+                {label}
               </Link>
             </li>
           ))}
@@ -219,34 +221,55 @@ const Navbar = () => {
                 </button>
               </li>
               {showDropdown && (
-                <div className="ml-4 mt-1 space-y-1">
-                  {["/account", "/cart", "/my-orders"].map((path, idx) => (
-                    <button
-                      key={idx}
+                <div className="ml-2 space-y-1">
+                  <li>
+                    <Link
+                      to="/account"
                       onClick={() => {
-                        setShowDropdown(false);
                         setMenuOpen(false);
-                        setTimeout(() => navigate(path), 100);
+                        setShowDropdown(false);
                       }}
-                      className="block w-full text-left px-4 py-2 rounded hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                     >
-                      {path === "/account"
-                        ? "My Account"
-                        : path === "/cart"
-                        ? "My Cart"
-                        : "My Orders"}
+                      My Account
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/cart"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Cart
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/my-orders"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Orders
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                        handleLogout();
+                      }}
+                      className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
+                    >
+                      Logout
                     </button>
-                  ))}
-                  <button
-                    onClick={() => {
-                      setShowDropdown(false);
-                      setMenuOpen(false);
-                      handleLogout();
-                    }}
-                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
-                  >
-                    Logout
-                  </button>
+                  </li>
                 </div>
               )}
             </>
