@@ -1,6 +1,6 @@
 import React from "react";
 import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/react";
+// import { SpeedInsights } from "@vercel/speed-insights/react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -72,7 +72,7 @@ const AppContent = () => {
     <>
       <ScrollToTop />
       <Analytics />
-      <SpeedInsights />
+      {/* <SpeedInsights /> */}
       {!isAdmin && <Navbar />}
       <Routes>
         {/* Public Routes */}
