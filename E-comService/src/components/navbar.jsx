@@ -17,6 +17,8 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,6 +34,16 @@ const Navbar = () => {
     return () => window.removeEventListener("user-logged-in", handleUserLogin);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleLogout = async () => {
     try {
       await axios.post(
@@ -43,6 +55,7 @@ const Navbar = () => {
       window.dispatchEvent(new Event("user-logged-in"));
       setUser(null);
       setMenuOpen(false);
+      setShowDropdown(false);
       toast.success("Logged out successfully!");
       navigate("/login");
     } catch (err) {
@@ -89,7 +102,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Desktop Links */}
+      {/* Desktop Menu */}
       <div className="hidden md:flex justify-center space-x-6 py-2 font-medium">
         {[
           ["/", "Home"],
@@ -103,18 +116,47 @@ const Navbar = () => {
             {label}
           </Link>
         ))}
+
         {user ? (
-          <>
-            <Link to="/account">My Account</Link>
-            <Link to="/cart">My Cart</Link>
-            <Link to="/my-orders">My Orders</Link>
+          <div className="relative" ref={dropdownRef}>
             <button
-              onClick={handleLogout}
-              className="text-red-600 hover:underline"
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="px-3 py-1 text-blue-600 hover:bg-blue-50 focus:outline-none"
             >
-              Logout
+              Profile
             </button>
-          </>
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-44 bg-white rounded shadow-md z-10">
+                <Link
+                  to="/account"
+                  onClick={() => setShowDropdown(false)}
+                  className="block px-4 py-2 hover:bg-blue-50"
+                >
+                  My Account
+                </Link>
+                <Link
+                  to="/cart"
+                  onClick={() => setShowDropdown(false)}
+                  className="block px-4 py-2 hover:bg-blue-50"
+                >
+                  My Cart
+                </Link>
+                <Link
+                  to="/my-orders"
+                  onClick={() => setShowDropdown(false)}
+                  className="block px-4 py-2 hover:bg-blue-50"
+                >
+                  My Orders
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
           <Link
             to="/login"
