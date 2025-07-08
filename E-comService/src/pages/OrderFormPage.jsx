@@ -68,7 +68,7 @@ const OrderFormPage = () => {
       );
 
       toast.success("✅ Order placed successfully!");
-      navigate("/my-orders");
+      navigate("/order-success");
     } catch (err) {
       console.error("Order Error:", err.response?.data || err.message);
       if (err.response?.status === 401) {
