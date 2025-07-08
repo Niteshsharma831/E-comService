@@ -308,8 +308,8 @@ const clearCart = async (req, res) => {
 const createOrder = async (req, res) => {
   try {
     const userId = req.userId;
-    console.log("User ID:", userId);
-    console.log("Request body:", req.body);
+    console.log("👉 UserID:", userId);
+    console.log("👉 Request Body:", req.body);
 
     const { fullName, gender, phone, address, pincode, paymentMethod, items } =
       req.body;
@@ -328,9 +328,14 @@ const createOrder = async (req, res) => {
     let orderItems = [];
 
     if (items && items.length > 0) {
-      orderItems = items;
+      // ✅ Convert productId to ObjectId
+      orderItems = items.map((item) => ({
+        productId: new mongoose.Types.ObjectId(item.productId),
+        quantity: item.quantity,
+      }));
     } else {
       const user = await User.findById(userId).populate("cart.productId");
+
       if (!user || user.cart.length === 0) {
         return res.status(400).json({ message: "Cart is empty." });
       }
@@ -341,7 +346,7 @@ const createOrder = async (req, res) => {
       }));
     }
 
-    console.log("Order items to be saved:", orderItems);
+    console.log("🛒 Order Items:", orderItems);
 
     const newOrder = await Order.create({
       userId,
@@ -358,12 +363,10 @@ const createOrder = async (req, res) => {
       await User.findByIdAndUpdate(userId, { $set: { cart: [] } });
     }
 
-    return res
-      .status(201)
-      .json({ message: "Order placed successfully", order: newOrder });
+    res.status(201).json({ message: "✅ Order placed!", order: newOrder });
   } catch (error) {
-    console.error("Order error:", error);
-    return res
+    console.error("❌ Order error:", error);
+    res
       .status(500)
       .json({ message: "Something went wrong while placing order." });
   }
