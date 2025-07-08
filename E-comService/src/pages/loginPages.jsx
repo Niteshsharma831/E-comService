@@ -30,8 +30,11 @@ const LoginPages = () => {
       const user = res.data.user;
       localStorage.setItem("user", JSON.stringify(user));
       window.dispatchEvent(new Event("user-logged-in"));
-      toast.success("🟢 Login successful!");
-      setTimeout(() => navigate("/"), 1500);
+
+      toast.success("🟢 Login successful!", {
+        onClose: () => navigate("/"),
+        autoClose: 1500,
+      });
     } catch (err) {
       console.error(err);
       setError("Invalid email or password");
