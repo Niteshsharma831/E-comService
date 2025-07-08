@@ -9,7 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Optional: Vercel Analytics
-import { Analytics } from "@vercel/analytics/react";
+// import { Analytics } from "@vercel/analytics/react";
 
 // Components & Pages
 import Navbar from "./components/navbar";
@@ -71,7 +71,7 @@ const AppContent = () => {
   return (
     <>
       <ScrollToTop />
-      <Analytics />
+      {/* <Analytics /> */}
       {!isAdmin && <Navbar />}
 
       <Routes>
