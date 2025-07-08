@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
@@ -38,6 +39,7 @@ const Navbar = () => {
   }, []);
 
   const getFirstName = (name) => name?.split(" ")[0];
+
   const handleLogout = async () => {
     try {
       await axios.post(
@@ -46,16 +48,13 @@ const Navbar = () => {
         { withCredentials: true }
       );
 
-      // Clear local data
       localStorage.removeItem("user");
       window.dispatchEvent(new Event("user-logged-in"));
+      setUser(null);
+      setMenuOpen(false);
+      setShowDropdown(false);
 
-      setUser(null); // ✅ Clear local state
-      setMenuOpen(false); // ✅ Close mobile menu
-      setShowDropdown(false); // ✅ Close dropdown
-
-      toast.success("🟢 Logged out successfully!"); // ✅ Toast message
-
+      toast.success("🟢 Logged out successfully!");
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
@@ -76,7 +75,6 @@ const Navbar = () => {
       {/* Top Row */}
       <div className="max-w-screen-xl mx-auto px-4 space-y-2 md:space-y-0 md:flex md:items-center md:justify-between">
         <div className="w-full md:w-auto">
-          {/* Brand */}
           <div className="flex justify-between items-center">
             <Link
               to="/"
@@ -92,7 +90,6 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* Marquee outside of <Link> */}
           <div className="rounded overflow-hidden">
             <marquee
               behavior="scroll"
@@ -208,53 +205,107 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
+      {menuOpen && (
+        <ul className="md:hidden px-4 pb-4 space-y-2 font-medium bg-white shadow-md">
+          <li>
+            <Link to="/" onClick={() => setMenuOpen(false)}>
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link to="/shop" onClick={() => setMenuOpen(false)}>
+              Shop
+            </Link>
+          </li>
+          <li>
+            <Link to="/electronic" onClick={() => setMenuOpen(false)}>
+              Electronic
+            </Link>
+          </li>
+          <li>
+            <Link to="/home&tv" onClick={() => setMenuOpen(false)}>
+              Home & TV
+            </Link>
+          </li>
+          <li>
+            <Link to="/fashions" onClick={() => setMenuOpen(false)}>
+              Fashions
+            </Link>
+          </li>
+          <li>
+            <Link to="/grocery" onClick={() => setMenuOpen(false)}>
+              Grocery
+            </Link>
+          </li>
 
-      {showDropdown && (
-        <div className="mt-2 ml-2 rounded bg-white shadow-md z-10 border">
-          <Link
-            to="/account"
-            onClick={() => {
-              setMenuOpen(false);
-              setShowDropdown(false);
-            }}
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-          >
-            My Account
-          </Link>
+          {user ? (
+            <>
+              <li className="relative">
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="block w-full text-left px-3 py-2 bg-gray-100 rounded"
+                >
+                  👤 Profile
+                </button>
 
-          <Link
-            to="/cart"
-            onClick={() => {
-              setMenuOpen(false);
-              setShowDropdown(false);
-            }}
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-          >
-            My Cart
-          </Link>
-
-          <Link
-            to="/my-orders"
-            onClick={() => {
-              setMenuOpen(false);
-              setShowDropdown(false);
-            }}
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-          >
-            My Orders
-          </Link>
-
-          <button
-            onClick={() => {
-              handleLogout();
-              setMenuOpen(false);
-              setShowDropdown(false);
-            }}
-            className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
-          >
-            Logout
-          </button>
-        </div>
+                {showDropdown && (
+                  <div className="mt-2 ml-2 rounded bg-white shadow-md z-10 border">
+                    <Link
+                      to="/account"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Account
+                    </Link>
+                    <Link
+                      to="/cart"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Cart
+                    </Link>
+                    <Link
+                      to="/my-orders"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      My Orders
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMenuOpen(false);
+                        setShowDropdown(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </li>
+            </>
+          ) : (
+            <li>
+              <Link
+                to="/login"
+                onClick={() => setMenuOpen(false)}
+                className="block bg-blue-600 text-white rounded px-3 py-1 w-fit"
+              >
+                Login
+              </Link>
+            </li>
+          )}
+        </ul>
       )}
 
       <ToastContainer position="top-right" autoClose={2000} hideProgressBar />
