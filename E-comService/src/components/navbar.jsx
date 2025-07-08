@@ -76,7 +76,7 @@ const Navbar = () => {
     <nav className="bg-white shadow-md fixed top-0 left-0 w-full z-50">
       <div className="max-w-screen-xl mx-auto px-4 py-2 flex justify-between items-center">
         <Link to="/" className="text-blue-600 font-bold text-xl">
-          Shopizo
+          🛍️ Shopizo
         </Link>
         <form onSubmit={handleSearchSubmit} className="hidden md:block w-1/2">
           <div className="relative">
