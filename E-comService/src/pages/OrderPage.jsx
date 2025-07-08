@@ -27,7 +27,7 @@ const MyOrdersPage = () => {
   const handleCancel = async (orderId) => {
     try {
       await axios.put(
-        `https://e-comservice.onrender.com/api/users/update-order-status/${orderId}`,
+        `https://e-comservice.onrender.com/api/orders/update-order-status/${orderId}`,
         { status: "Canceled" },
         { withCredentials: true }
       );

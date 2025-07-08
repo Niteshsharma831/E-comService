@@ -434,26 +434,33 @@ const submitQuery = async (req, res) => {
 };
 const updateOrderStatus = async (req, res) => {
   const { status } = req.body;
-  try {
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ message: "Order not found" });
+  const orderId = req.params.id;
 
-    // Allow only the owner to cancel their order
-    if (order.user.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Unauthorized" });
+  try {
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found." });
+    }
+
+    // Only the user who created the order can update it
+    if (order.user.toString() !== req.userId) {
+      return res.status(403).json({ message: "Unauthorized action." });
     }
 
     order.status = status;
     await order.save();
 
-    res.status(200).json({ message: "Order status updated", order });
+    res.status(200).json({
+      message: `Order ${
+        status === "Canceled" ? "canceled" : "updated"
+      } successfully.`,
+      order,
+    });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to update order status", error: err.message });
+    console.error("Error updating order status:", err.message);
+    res.status(500).json({ message: "Failed to update order status." });
   }
 };
-
 const getQueries = async (req, res) => {
   try {
     const userId = req.userId;
