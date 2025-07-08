@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const MyOrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
 
   const fetchOrders = () => {
     setLoading(true);
@@ -41,12 +42,16 @@ const MyOrdersPage = () => {
     }
   };
 
+  const toggleExpand = (orderId) => {
+    setExpandedOrderId((prev) => (prev === orderId ? null : orderId));
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="min-h-screen mt-24 px-4 md:px-10 py-6 bg-gradient-to-br from-indigo-50 to-white"
+      className="min-h-screen mt-24 px-4 md:px-10 py-6 bg-gray-50"
     >
       <h2 className="text-3xl font-extrabold mb-8 text-indigo-700 text-center">
         📦 My Orders
@@ -55,88 +60,101 @@ const MyOrdersPage = () => {
       {loading ? (
         <div className="text-center text-gray-500">Loading orders...</div>
       ) : orders.length === 0 ? (
-        <div className="text-center text-gray-600 text-lg">
-          No orders found.
-        </div>
+        <div className="text-center text-gray-600 text-lg">No orders found.</div>
       ) : (
-        <div className="overflow-x-auto shadow-lg rounded-xl">
-          <table className="w-full text-sm text-left bg-white rounded-xl">
-            <thead className="bg-indigo-100 text-indigo-700 text-sm uppercase">
-              <tr>
-                <th className="p-4">#</th>
-                <th className="p-4">Name</th>
-                <th className="p-4">Phone</th>
-                <th className="p-4">Address</th>
-                <th className="p-4">Payment</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Items</th>
-                <th className="p-4">Date</th>
-                <th className="p-4 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order, index) => (
-                <motion.tr
-                  key={order._id}
-                  className="border-t hover:bg-gray-50 transition"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <td className="p-4">{index + 1}</td>
-                  <td className="p-4 font-medium">{order.fullName}</td>
-                  <td className="p-4">{order.phone}</td>
-                  <td className="p-4 max-w-xs">{order.address}</td>
-                  <td className="p-4">{order.paymentMethod}</td>
-                  <td className="p-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        order.status === "Cancelled"
-                          ? "bg-red-100 text-red-600"
-                          : "bg-green-100 text-green-700"
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="p-4 space-y-2">
-                    {order.items.map((item, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <img
-                          src={item.productId?.image}
-                          alt={item.productId?.name}
-                          className="w-10 h-10 rounded object-cover border"
-                        />
-                        <div>
-                          <p className="font-medium text-sm">
-                            {item.productId?.name || "Unknown"}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            Qty: {item.quantity}
-                          </p>
-                        </div>
+        <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {orders.map((order) => (
+            <motion.div
+              key={order._id}
+              className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition cursor-pointer"
+              onClick={() => toggleExpand(order._id)}
+              layout
+            >
+              <div className="p-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-semibold text-indigo-700">
+                      {order.fullName}
+                    </h3>
+                    <p className="text-sm text-gray-500">{order.phone}</p>
+                  </div>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      order.status === "Cancelled"
+                        ? "bg-red-100 text-red-600"
+                        : "bg-green-100 text-green-700"
+                    }`}
+                  >
+                    {order.status}
+                  </span>
+                </div>
+
+                <p className="text-sm mt-2 text-gray-700">
+                  {new Date(order.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+
+              <AnimatePresence initial={false}>
+                {expandedOrderId === order._id && (
+                  <motion.div
+                    className="px-4 pb-4"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="mt-2 text-sm text-gray-700">
+                      <p>
+                        <strong>Address:</strong> {order.address}
+                      </p>
+                      <p>
+                        <strong>Payment:</strong> {order.paymentMethod}
+                      </p>
+                    </div>
+
+                    <div className="mt-4">
+                      <h4 className="font-semibold mb-2 text-indigo-600 text-sm">
+                        Ordered Items:
+                      </h4>
+                      <div className="space-y-2">
+                        {order.items.map((item, i) => (
+                          <div key={i} className="flex gap-3 items-center">
+                            <img
+                              src={item.productId?.image}
+                              alt={item.productId?.name}
+                              className="w-12 h-12 object-cover rounded border"
+                            />
+                            <div>
+                              <p className="font-medium text-sm">
+                                {item.productId?.name || "Unknown"}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Qty: {item.quantity}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </td>
-                  <td className="p-4">
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="p-4 text-center">
-                    {order.status === "Cancelled" ? (
-                      <span className="text-gray-400 text-xs">No Action</span>
-                    ) : (
-                      <button
-                        onClick={() => handleCancel(order._id)}
-                        className="bg-red-500 text-white px-3 py-1 rounded-full hover:bg-red-600 text-xs transition"
-                      >
-                        Cancel
-                      </button>
+                    </div>
+
+                    {order.status !== "Cancelled" && (
+                      <div className="mt-4 text-right">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation(); // prevent card toggle
+                            handleCancel(order._id);
+                          }}
+                          className="bg-red-500 text-white text-xs px-4 py-1 rounded-full hover:bg-red-600"
+                        >
+                          Cancel Order
+                        </button>
+                      </div>
                     )}
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
         </div>
       )}
     </motion.div>
