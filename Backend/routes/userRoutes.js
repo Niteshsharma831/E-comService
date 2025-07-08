@@ -43,7 +43,7 @@ router.delete("/cart/clear", authMiddleware, clearCart);
 // Order routes
 router.post("/create-order", authMiddleware, createOrder);
 router.get("/mine", authMiddleware, getMyOrders);
-router.put("/update-order-status/:id", authMiddleware, updateOrderStatus);
+router.put("/update-status/:id", authMiddleware, updateOrderStatus);
 
 // Queries
 router.post("/query", authMiddleware, submitQuery);
