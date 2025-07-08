@@ -27,6 +27,7 @@ import GroceryPage from "./pages/GroceryPage";
 import SmartPhones from "./pages/SmartPhones";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import Query from "./pages/Query";
+import Maintenance from "./components/Maintenance";
 
 // Admin Pages
 import Dashboard from "./pages/admin/Dashboard";
@@ -45,11 +46,9 @@ import AdminProfile from "./pages/admin/AdminProfile";
 import BuyNowPage from "./pages/BuyNowPage";
 import OrderFormPage from "./pages/OrderFormPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
-import Maintenance from "./components/Maintenance";
 
 // Utilities
-// import ScrollToTop from "./hooks/ScrollToTop";
-// import Maintenance from "./pages/Maintenance"; // ✅ Maintenance page
+import ScrollToTop from "./hooks/ScrollToTop";
 
 // Helper Hook to Detect Admin Route
 const useIsAdminRoute = () => {
