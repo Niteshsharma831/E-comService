@@ -20,7 +20,6 @@ const OrderFormPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Prefill user details if logged in
     axios
       .get("https://e-comservice.onrender.com/api/users/profile", {
         withCredentials: true,
@@ -62,14 +61,14 @@ const OrderFormPage = () => {
     };
 
     try {
-      const res = await axios.post(
+      await axios.post(
         "https://e-comservice.onrender.com/api/users/create-order",
         orderPayload,
         { withCredentials: true }
       );
 
       toast.success("✅ Order placed successfully!");
-      navigate("/order-success");
+      navigate("/my-orders");
     } catch (err) {
       console.error("Order Error:", err.response?.data || err.message);
       if (err.response?.status === 401) {
@@ -83,83 +82,153 @@ const OrderFormPage = () => {
     }
   };
 
+  const calculateDiscountedPrice = () => {
+    const price = product?.price || 0;
+    const discount = 2940;
+    return price - discount;
+  };
+
   return (
-    <div className="mt-24 min-h-screen px-6 py-8 bg-gray-100">
-      <div className="max-w-xl mx-auto bg-white p-8 shadow-md rounded">
-        <h2 className="text-2xl font-bold mb-6 text-green-700">
-          🛒 Delivery Details
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="fullName"
-            placeholder="Full Name"
-            value={form.fullName}
-            onChange={handleChange}
-            required
-            className="w-full border p-2 rounded"
-          />
+    <div className="min-h-screen bg-gray-100 px-4 py-16">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Order Summary */}
+        <div className="bg-white rounded shadow p-6">
+          <h2 className="text-xl font-semibold border-b pb-3 mb-4">
+            📦 Order Summary
+          </h2>
+          <div className="flex items-center gap-4 mb-4">
+            <img
+              src={product?.image}
+              alt={product?.name}
+              className="w-24 h-24 object-contain border rounded"
+            />
+            <div>
+              <h3 className="font-semibold text-lg">{product?.name}</h3>
+              <p className="text-sm text-gray-600">
+                Category: {product?.category}
+              </p>
+              <p className="text-sm text-gray-600">Brand: {product?.brand}</p>
+              <p className="text-yellow-500 text-sm">⭐ 5 / 5</p>
+              <p className="text-green-600 text-sm">
+                Delivery by:{" "}
+                {new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toDateString()}
+              </p>
+            </div>
+          </div>
+          <div className="text-sm space-y-2">
+            <div className="flex justify-between">
+              <span>Price</span>
+              <span>₹{product?.price}</span>
+            </div>
+            <div className="flex justify-between text-green-600">
+              <span>Discount</span>
+              <span>- ₹2940</span>
+            </div>
+            <div className="flex justify-between text-blue-600">
+              <span>Delivery Charges</span>
+              <span>FREE</span>
+            </div>
+            <hr />
+            <div className="flex justify-between font-semibold text-lg">
+              <span>Total Amount</span>
+              <span>₹{calculateDiscountedPrice()}</span>
+            </div>
+          </div>
+        </div>
 
-          <select
-            name="gender"
-            value={form.gender}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-          >
-            <option>Male</option>
-            <option>Female</option>
-            <option>Other</option>
-          </select>
+        {/* Delivery Form */}
+        <div className="bg-white rounded shadow p-6">
+          <h2 className="text-xl font-semibold border-b pb-3 mb-4">
+            📝 Enter Delivery Details
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              name="fullName"
+              placeholder="Full Name"
+              value={form.fullName}
+              onChange={handleChange}
+              required
+              className="w-full border p-2 rounded"
+            />
 
-          <input
-            type="tel"
-            name="phone"
-            placeholder="Phone"
-            value={form.phone}
-            onChange={handleChange}
-            required
-            className="w-full border p-2 rounded"
-          />
+            <select
+              name="gender"
+              value={form.gender}
+              onChange={handleChange}
+              className="w-full border p-2 rounded"
+            >
+              <option>Select Gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
 
-          <textarea
-            name="address"
-            placeholder="Address"
-            value={form.address}
-            onChange={handleChange}
-            required
-            className="w-full border p-2 rounded"
-          />
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Mobile Number"
+              value={form.phone}
+              onChange={handleChange}
+              required
+              className="w-full border p-2 rounded"
+            />
 
-          <input
-            type="text"
-            name="pincode"
-            placeholder="Pincode"
-            value={form.pincode}
-            onChange={handleChange}
-            required
-            className="w-full border p-2 rounded"
-          />
+            <input
+              type="text"
+              name="pincode"
+              placeholder="PIN Code"
+              value={form.pincode}
+              onChange={handleChange}
+              required
+              className="w-full border p-2 rounded"
+            />
 
-          <select
-            name="paymentMethod"
-            value={form.paymentMethod}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-          >
-            <option value="COD">Cash on Delivery</option>
-            <option value="Online" disabled>
-              Online Payment (Coming Soon)
-            </option>
-          </select>
+            <textarea
+              name="address"
+              placeholder="Delivery Address"
+              value={form.address}
+              onChange={handleChange}
+              required
+              className="w-full border p-2 rounded"
+            />
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
-          >
-            ✅ {isSubmitting ? "Placing Order..." : "Place Order"}
-          </button>
-        </form>
+            <div>
+              <label className="block font-semibold mb-1">
+                Payment Method:
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="COD"
+                    checked={form.paymentMethod === "COD"}
+                    onChange={handleChange}
+                  />
+                  Cash on Delivery
+                </label>
+                <label className="flex items-center gap-2 text-gray-400">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="Online"
+                    disabled
+                  />
+                  Online Payment
+                </label>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
+            >
+              ✅ {isSubmitting ? "Placing Order..." : "Place Order"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
