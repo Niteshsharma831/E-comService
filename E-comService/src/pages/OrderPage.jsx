@@ -27,8 +27,8 @@ const MyOrdersPage = () => {
   const handleCancel = async (orderId) => {
     try {
       await axios.put(
-        `https://e-comservice.onrender.com/api/orders/update-status/${orderId}`,
-        { status: "Cancelled" }, // ✅ Correct spelling here
+        `https://e-comservice.onrender.com/api/users/update-status/${orderId}`,
+        { status: "Cancelled" },
         { withCredentials: true }
       );
       toast.success("✅ Order cancelled successfully");
