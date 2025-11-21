@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import API from "../api"; // ✅ Using API instance
 
 const LoginPages = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -21,20 +22,14 @@ const LoginPages = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        "https://e-comservice.onrender.com/api/users/login",
-        formData,
-        { withCredentials: true }
-      );
+      const res = await API.post("/users/login", formData);
 
       const user = res.data.user;
       localStorage.setItem("user", JSON.stringify(user));
       window.dispatchEvent(new Event("user-logged-in"));
 
-      toast.success("🟢 Login successful!", {
-        onClose: () => navigate("/"),
-        autoClose: 1500,
-      });
+      toast.success("🟢 Login successful!");
+      navigate("/"); // 🔥 Instant redirect
     } catch (err) {
       console.error(err);
       setError("Invalid email or password");
@@ -46,7 +41,7 @@ const LoginPages = () => {
 
   return (
     <div className="h-screen flex flex-col md:flex-row items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200 px-4">
-      {/* Left Side – Logo/Image */}
+      {/* Left Image */}
       <div className="md:w-1/2 w-full flex justify-center mb-6 md:mb-0">
         <img
           src="https://graphicsfamily.com/wp-content/uploads/edd/2021/08/E-Commerce-Logo-Design-PNG.png"
@@ -55,7 +50,7 @@ const LoginPages = () => {
         />
       </div>
 
-      {/* Right Side – Login Form */}
+      {/* Login Card */}
       <div className="md:w-1/2 w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
         <h2 className="text-3xl font-bold text-center text-blue-600 mb-6">
           Login to Your Account
@@ -71,12 +66,12 @@ const LoginPages = () => {
               placeholder="you@example.com"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 mt-1 border rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              className="w-full px-4 py-2 mt-1 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
               required
             />
           </div>
 
-          {/* Password with Eye Toggle */}
+          {/* Password */}
           <div>
             <label className="block text-sm font-medium">Password</label>
             <div className="relative">
@@ -86,7 +81,7 @@ const LoginPages = () => {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-2 mt-1 border rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none pr-10"
+                className="w-full px-4 py-2 mt-1 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none pr-10"
                 required
               />
               <span
@@ -101,7 +96,7 @@ const LoginPages = () => {
           {/* Error */}
           {error && <p className="text-red-600 text-sm">{error}</p>}
 
-          {/* Submit Button */}
+          {/* Button */}
           <button
             type="submit"
             disabled={loading}
@@ -114,7 +109,6 @@ const LoginPages = () => {
             {loading ? "Logging in..." : "Login"}
           </button>
 
-          {/* Links */}
           <div className="flex justify-between text-sm mt-4">
             <Link
               to="/forgot-password"
@@ -122,6 +116,7 @@ const LoginPages = () => {
             >
               Forgot Password?
             </Link>
+
             <Link to="/register" className="text-blue-500 hover:underline">
               Create an Account
             </Link>

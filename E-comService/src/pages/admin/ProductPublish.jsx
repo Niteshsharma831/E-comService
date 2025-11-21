@@ -1,6 +1,7 @@
+// src/pages/ProductPublish.jsx
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import AdminLayout from "./AdminLayout";
+import API from "../../api"; // centralized API instance
 
 const ProductPublish = () => {
   const [formData, setFormData] = useState({
@@ -22,6 +23,7 @@ const ProductPublish = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  // Update preview image when imageFile or imageURL changes
   useEffect(() => {
     if (formData.imageURL) {
       setPreviewImage(formData.imageURL);
@@ -55,14 +57,16 @@ const ProductPublish = () => {
     }));
   };
 
+  // Upload image to Cloudinary
   const uploadImageToCloudinary = async () => {
     if (!formData.imageFile) return formData.imageURL;
 
     const uploadData = new FormData();
     uploadData.append("file", formData.imageFile);
     uploadData.append("upload_preset", "unsigned_upload");
+
     try {
-      const res = await axios.post(
+      const res = await API.post(
         "https://api.cloudinary.com/v1_1/dva8v7gxm/image/upload",
         uploadData
       );
@@ -87,10 +91,7 @@ const ProductPublish = () => {
         tags: formData.tags.filter((t) => t.trim() !== ""),
       };
 
-      const res = await axios.post(
-        "https://e-comservice.onrender.com/api/products/create",
-        productData
-      );
+      await API.post("/products/create", productData);
       setMessage("✅ Product Published Successfully!");
       setFormData({
         name: "",
@@ -136,7 +137,7 @@ const ProductPublish = () => {
               value={formData.name}
               onChange={handleChange}
               placeholder="Product Name"
-              className="input"
+              className="w-full border px-3 py-2 rounded-md focus:ring focus:ring-indigo-300"
             />
 
             {/* Price */}
@@ -146,15 +147,15 @@ const ProductPublish = () => {
               onChange={handleChange}
               type="number"
               placeholder="Price ₹"
-              className="input"
+              className="w-full border px-3 py-2 rounded-md focus:ring focus:ring-indigo-300"
             />
 
-            {/* Category (Dropdown) */}
+            {/* Category */}
             <select
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="input"
+              className="w-full border px-3 py-2 rounded-md focus:ring focus:ring-indigo-300"
             >
               <option value="">Select Category</option>
               <option value="smartphone">Smartphone</option>
@@ -176,7 +177,7 @@ const ProductPublish = () => {
               onChange={handleChange}
               type="number"
               placeholder="Stock quantity"
-              className="input"
+              className="w-full border px-3 py-2 rounded-md focus:ring focus:ring-indigo-300"
             />
 
             {/* Brand */}
@@ -185,7 +186,7 @@ const ProductPublish = () => {
               value={formData.brand}
               onChange={handleChange}
               placeholder="Brand"
-              className="input"
+              className="w-full border px-3 py-2 rounded-md focus:ring focus:ring-indigo-300"
             />
 
             {/* Rating */}
@@ -197,7 +198,7 @@ const ProductPublish = () => {
               placeholder="Rating (1-5)"
               min={1}
               max={5}
-              className="input"
+              className="w-full border px-3 py-2 rounded-md focus:ring focus:ring-indigo-300"
             />
 
             {/* Discount */}
@@ -207,7 +208,7 @@ const ProductPublish = () => {
               onChange={handleChange}
               type="number"
               placeholder="Discount (%)"
-              className="input"
+              className="w-full border px-3 py-2 rounded-md focus:ring focus:ring-indigo-300"
             />
 
             {/* SKU */}
@@ -216,7 +217,7 @@ const ProductPublish = () => {
               value={formData.sku}
               onChange={handleChange}
               placeholder="SKU"
-              className="input"
+              className="w-full border px-3 py-2 rounded-md focus:ring focus:ring-indigo-300"
             />
 
             {/* Image URL */}
@@ -225,18 +226,18 @@ const ProductPublish = () => {
               value={formData.imageURL}
               onChange={handleChange}
               placeholder="Image URL (optional)"
-              className="input col-span-2"
+              className="col-span-2 w-full border px-3 py-2 rounded-md focus:ring focus:ring-indigo-300"
             />
 
-            {/* OR File Upload */}
+            {/* Image File */}
             <input
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              className="input col-span-2"
+              className="col-span-2 w-full"
             />
 
-            {/* Preview */}
+            {/* Image Preview */}
             {previewImage && (
               <div className="col-span-2 text-center">
                 <img
@@ -256,7 +257,7 @@ const ProductPublish = () => {
                   value={desc}
                   onChange={(e) => handleArrayChange(e, idx, "description")}
                   placeholder={`Point ${idx + 1}`}
-                  className="input mb-2"
+                  className="w-full border px-3 py-2 rounded-md mb-2 focus:ring focus:ring-indigo-300"
                 />
               ))}
               <button
@@ -277,7 +278,7 @@ const ProductPublish = () => {
                   value={tag}
                   onChange={(e) => handleArrayChange(e, idx, "tags")}
                   placeholder={`Tag ${idx + 1}`}
-                  className="input mb-2"
+                  className="w-full border px-3 py-2 rounded-md mb-2 focus:ring focus:ring-indigo-300"
                 />
               ))}
               <button
@@ -289,7 +290,7 @@ const ProductPublish = () => {
               </button>
             </div>
 
-            {/* Submit */}
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}

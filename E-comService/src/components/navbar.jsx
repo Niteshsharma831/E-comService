@@ -12,6 +12,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import API from "../api";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,6 +22,7 @@ const Navbar = () => {
   const dropdownRef = useRef();
   const navigate = useNavigate();
 
+  // Load user from localStorage and listen for login events
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) setUser(JSON.parse(storedUser));
@@ -28,12 +30,14 @@ const Navbar = () => {
     const handleUserLogin = () => {
       const updatedUser = localStorage.getItem("user");
       if (updatedUser) setUser(JSON.parse(updatedUser));
+      else setUser(null);
     };
 
     window.addEventListener("user-logged-in", handleUserLogin);
     return () => window.removeEventListener("user-logged-in", handleUserLogin);
   }, []);
 
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -44,26 +48,35 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Replace the existing handleLogout with this:
   const handleLogout = async () => {
     try {
-      await axios.post(
-        "https://e-comservice.onrender.com/api/users/logout",
-        {},
-        { withCredentials: true }
-      );
+      // Use centralized API instance
+      await API.post("/users/logout"); // withCredentials is already set in API
+
+      // Clear frontend session
       localStorage.removeItem("user");
-      window.dispatchEvent(new Event("user-logged-in"));
       setUser(null);
       setMenuOpen(false);
       setShowDropdown(false);
+
+      // Trigger global login update
+      window.dispatchEvent(new Event("user-logged-in"));
+
       toast.success("Logged out successfully!");
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
-      toast.error("Logout failed. Please try again.");
+
+      if (err.response?.data?.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Logout failed. Please try again.");
+      }
     }
   };
 
+  // Search submit
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -72,12 +85,22 @@ const Navbar = () => {
     }
   };
 
+  const menuLinks = [
+    ["/", "Home"],
+    ["/shop", "Shop"],
+    ["/electronic", "Electronic"],
+    ["/home&tv", "Home & TV"],
+    ["/fashions", "Fashions"],
+    ["/grocery", "Grocery"],
+  ];
+
   return (
     <nav className="bg-white shadow-md fixed top-0 left-0 w-full z-50 py-4 md:py-2">
       <div className="max-w-screen-xl mx-auto px-4 py-2 flex justify-between items-center">
         <Link to="/" className="text-blue-600 font-bold text-xl">
           🛍️ Shopizo
         </Link>
+
         <form onSubmit={handleSearchSubmit} className="hidden md:block w-1/2">
           <div className="relative">
             <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
@@ -92,6 +115,7 @@ const Navbar = () => {
             />
           </div>
         </form>
+
         <div className="flex items-center gap-4">
           <button
             className="md:hidden text-gray-700"
@@ -104,14 +128,7 @@ const Navbar = () => {
 
       {/* Desktop Menu */}
       <div className="hidden md:flex justify-center space-x-6 py-2 font-medium">
-        {[
-          ["/", "Home"],
-          ["/shop", "Shop"],
-          ["/electronic", "Electronic"],
-          ["/home&tv", "Home & TV"],
-          ["/fashions", "Fashions"],
-          ["/grocery", "Grocery"],
-        ].map(([path, label], idx) => (
+        {menuLinks.map(([path, label], idx) => (
           <Link key={idx} to={path}>
             {label}
           </Link>
@@ -125,6 +142,7 @@ const Navbar = () => {
             >
               Profile
             </button>
+
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-44 bg-white rounded shadow-md z-10">
                 <Link
@@ -149,7 +167,10 @@ const Navbar = () => {
                   My Orders
                 </Link>
                 <button
-                  onClick={handleLogout}
+                  onClick={() => {
+                    handleLogout();
+                    setShowDropdown(false);
+                  }}
                   className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
                 >
                   Logout
@@ -171,14 +192,7 @@ const Navbar = () => {
       {menuOpen && (
         <div className="md:hidden bg-white shadow-md px-4 pb-4">
           <ul className="space-y-2 font-medium text-gray-700">
-            {[
-              ["/", "Home"],
-              ["/shop", "Shop"],
-              ["/electronic", "Electronic"],
-              ["/home&tv", "Home & TV"],
-              ["/fashions", "Fashions"],
-              ["/grocery", "Grocery"],
-            ].map(([path, label], idx) => (
+            {menuLinks.map(([path, label], idx) => (
               <li key={idx}>
                 <Link
                   to={path}

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import AdminLayout from "./AdminLayout";
+import API from "../../api"; // <-- your pre-configured axios instance
 
 const UpdateProductForm = () => {
   const { id } = useParams();
@@ -26,12 +26,11 @@ const UpdateProductForm = () => {
   const [previewImage, setPreviewImage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Fetch product details
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(
-          `https://e-comservice.onrender.com/api/products/getproducts/${id}`
-        );
+        const res = await API.get(`/products/getproducts/${id}`);
         const data = res.data.product;
         setFormData({
           name: data.name || "",
@@ -51,18 +50,14 @@ const UpdateProductForm = () => {
         toast.error("❌ Failed to load product data");
       }
     };
-
     fetchProduct();
   }, [id]);
 
   useEffect(() => {
-    if (formData.imageURL) {
-      setPreviewImage(formData.imageURL);
-    } else if (formData.imageFile) {
+    if (formData.imageURL) setPreviewImage(formData.imageURL);
+    else if (formData.imageFile)
       setPreviewImage(URL.createObjectURL(formData.imageFile));
-    } else {
-      setPreviewImage("");
-    }
+    else setPreviewImage("");
   }, [formData.imageURL, formData.imageFile]);
 
   const handleChange = (e) => {
@@ -71,9 +66,9 @@ const UpdateProductForm = () => {
   };
 
   const handleArrayChange = (e, index, field) => {
-    const newArray = [...formData[field]];
-    newArray[index] = e.target.value;
-    setFormData((prev) => ({ ...prev, [field]: newArray }));
+    const arr = [...formData[field]];
+    arr[index] = e.target.value;
+    setFormData((prev) => ({ ...prev, [field]: arr }));
   };
 
   const addField = (field) => {
@@ -96,7 +91,7 @@ const UpdateProductForm = () => {
     uploadData.append("upload_preset", "unsigned_upload");
 
     try {
-      const res = await axios.post(
+      const res = await API.post(
         "https://api.cloudinary.com/v1_1/dva8v7gxm/image/upload",
         uploadData
       );
@@ -120,15 +115,12 @@ const UpdateProductForm = () => {
         tags: formData.tags.filter((t) => t.trim() !== ""),
       };
 
-      await axios.put(
-        `https://e-comservice.onrender.com/api/products/updateproducts/${id}`,
-        productData
-      );
+      await API.put(`/products/updateproducts/${id}`, productData);
 
       toast.success("✅ Product updated successfully!");
       setTimeout(() => navigate("/admin/products"), 1500);
     } catch (err) {
-      console.error("Update failed:", err);
+      console.error(err);
       toast.error("❌ Failed to update product");
     } finally {
       setLoading(false);
@@ -142,7 +134,6 @@ const UpdateProductForm = () => {
           <h2 className="text-3xl font-bold text-indigo-700 mb-6 text-center">
             Update Product
           </h2>
-
           <form onSubmit={handleSubmit} className="grid gap-6 md:grid-cols-2">
             {[
               { name: "name", label: "Product Name" },
@@ -165,7 +156,6 @@ const UpdateProductForm = () => {
               />
             ))}
 
-            {/* Image URL */}
             <input
               name="imageURL"
               value={formData.imageURL}
@@ -174,7 +164,6 @@ const UpdateProductForm = () => {
               className="col-span-2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm"
             />
 
-            {/* Image Upload */}
             <input
               type="file"
               accept="image/*"
@@ -182,7 +171,6 @@ const UpdateProductForm = () => {
               className="col-span-2"
             />
 
-            {/* Image Preview */}
             {previewImage && (
               <div className="col-span-2 text-center">
                 <img
@@ -193,7 +181,6 @@ const UpdateProductForm = () => {
               </div>
             )}
 
-            {/* Description */}
             <div className="col-span-2">
               <label className="font-medium block mb-2">Description</label>
               {formData.description.map((desc, idx) => (
@@ -214,7 +201,6 @@ const UpdateProductForm = () => {
               </button>
             </div>
 
-            {/* Tags */}
             <div className="col-span-2">
               <label className="font-medium block mb-2">Tags</label>
               {formData.tags.map((tag, idx) => (
@@ -235,7 +221,6 @@ const UpdateProductForm = () => {
               </button>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}

@@ -1,8 +1,9 @@
+// src/pages/Query.jsx
 import React, { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import axios from "axios";
 import { FaUser, FaEnvelope, FaCommentDots } from "react-icons/fa";
+import API from "../api";
 
 function Query() {
   const [formData, setFormData] = useState({
@@ -18,13 +19,8 @@ function Query() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const res = await axios.post(
-        "https://e-comservice.onrender.com/api/users/query",
-        formData,
-        { withCredentials: true } 
-      );
+      const res = await API.post("/users/query", formData);
 
       if (res.status === 200 || res.status === 201) {
         toast.success("✅ Your query has been submitted!", {
@@ -58,8 +54,7 @@ function Query() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block mb-2 text-gray-700 font-medium">
-                <FaUser className="inline mr-2 text-blue-500" />
-                Name
+                <FaUser className="inline mr-2 text-blue-500" /> Name
               </label>
               <input
                 type="text"
@@ -74,8 +69,7 @@ function Query() {
 
             <div>
               <label className="block mb-2 text-gray-700 font-medium">
-                <FaEnvelope className="inline mr-2 text-blue-500" />
-                Email
+                <FaEnvelope className="inline mr-2 text-blue-500" /> Email
               </label>
               <input
                 type="email"
@@ -115,8 +109,7 @@ function Query() {
 
             <div>
               <label className="block mb-2 text-gray-700 font-medium">
-                <FaCommentDots className="inline mr-2 text-blue-500" />
-                Message
+                <FaCommentDots className="inline mr-2 text-blue-500" /> Message
               </label>
               <textarea
                 name="message"

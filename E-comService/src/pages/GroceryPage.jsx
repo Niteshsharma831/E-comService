@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import { FaCartPlus, FaFilter, FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import FilterPage from "../components/FilterPage";
+import API from "../api"; // ✅ USE API INSTANCE
 
 const GroceryPage = () => {
   const [products, setProducts] = useState([]);
@@ -13,11 +13,11 @@ const GroceryPage = () => {
 
   const handleAddToCart = async (productId) => {
     try {
-      await axios.post(
-        "https://e-comservice.onrender.com/api/users/cart/add",
-        { productId, quantity: 1 },
-        { withCredentials: true }
-      );
+      await API.post("/users/cart/add", {
+        productId,
+        quantity: 1,
+      });
+
       toast.success("✅ Added to cart");
     } catch (err) {
       if (err.response?.status === 401) {
@@ -63,14 +63,13 @@ const GroceryPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(
-          "https://e-comservice.onrender.com/api/products/getallproducts"
-        );
+        const res = await API.get("/products/getallproducts");
         const allProducts = res.data.products || [];
 
-        const filtered = allProducts.filter((product) => {
+        const groceryFiltered = allProducts.filter((product) => {
           const category = product.category?.toLowerCase() || "";
           const name = product.name?.toLowerCase() || "";
+
           return (
             category.includes("grocery") ||
             category.includes("food") ||
@@ -83,13 +82,13 @@ const GroceryPage = () => {
           );
         });
 
-        setProducts(filtered);
-        setFiltered(filtered);
-        setTimeout(() => setLoading(false), 1000);
+        setProducts(groceryFiltered);
+        setFiltered(groceryFiltered);
+        setLoading(false);
       } catch (err) {
         console.error("Error fetching grocery products:", err.message);
-        setLoading(false);
         toast.error("❌ Failed to load grocery products");
+        setLoading(false);
       }
     };
 
@@ -102,7 +101,7 @@ const GroceryPage = () => {
       <div className="flex justify-between items-center mb-4">
         <button
           onClick={() => setShowFilter(true)}
-          className="flex items-center gap-1 bg-indigo-600 text-white px-3 py-1 text-sm rounded shadow hover:bg-indigo-700 lg:hidden bg-green-200"
+          className="flex items-center gap-1 bg-indigo-600 text-white px-3 py-1 text-sm rounded shadow hover:bg-indigo-700 lg:hidden"
         >
           <FaFilter size={14} /> Filter
         </button>
@@ -120,12 +119,12 @@ const GroceryPage = () => {
         </div>
       ) : (
         <div className="flex h-[calc(100vh-150px)] overflow-hidden">
-          {/* Sidebar - Desktop */}
+          {/* Sidebar */}
           <div className="w-64 hidden lg:block sticky top-24 h-full overflow-y-auto p-4 bg-green-200 shadow">
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
 
-          {/* Products Grid */}
+          {/* Products */}
           <div className="flex-1 overflow-y-auto p-2">
             {filtered.length === 0 ? (
               <div className="flex items-center justify-center min-h-[400px]">
@@ -155,6 +154,7 @@ const GroceryPage = () => {
                       <p className="text-sm text-gray-600 mb-2 capitalize">
                         {product.category}
                       </p>
+
                       <ul className="text-sm text-gray-500 mb-3 list-disc ml-5">
                         {(Array.isArray(product.description)
                           ? product.description
@@ -165,6 +165,7 @@ const GroceryPage = () => {
                             <li key={i}>{point}</li>
                           ))}
                       </ul>
+
                       <div className="flex justify-between items-center">
                         <span className="text-lg font-bold text-green-700">
                           ₹{product.price}
@@ -180,12 +181,9 @@ const GroceryPage = () => {
                     <button
                       title="Add to Cart"
                       onClick={() => handleAddToCart(product._id)}
-                      className="absolute top-2 right-2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 hover:scale-110 transition-transform duration-200 ease-in-out shadow-md hover:shadow-lg group"
+                      className="absolute top-2 right-2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 hover:scale-110 transition-transform shadow-md"
                     >
-                      <FaCartPlus
-                        size={18}
-                        className="group-hover:animate-pulse"
-                      />
+                      <FaCartPlus size={18} />
                     </button>
                   </div>
                 ))}
@@ -195,10 +193,9 @@ const GroceryPage = () => {
         </div>
       )}
 
-      {/* Mobile Filter Drawer */}
+      {/* Mobile Filter */}
       {showFilter && (
         <div className="fixed inset-0 z-50 flex">
-          {/* Filter Panel */}
           <div className="w-72 bg-white shadow-lg p-4 overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Filters</h2>
@@ -209,16 +206,17 @@ const GroceryPage = () => {
                 <FaTimes size={20} />
               </button>
             </div>
+
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
 
-          {/* Overlay */}
           <div
             className="flex-1 bg-black bg-opacity-30"
             onClick={() => setShowFilter(false)}
           />
         </div>
       )}
+
       <ToastContainer />
     </div>
   );

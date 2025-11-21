@@ -1,8 +1,8 @@
+// src/pages/ProductDetailPage.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import API from "../api";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -12,12 +12,14 @@ const ProductDetailPage = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(
-          `https://e-comservice.onrender.com/api/products/getproducts/${id}`
-        );
+        const res = await API.get(`/products/getproducts/${id}`);
         setProduct(res.data.product);
       } catch (err) {
-        console.error("Error loading product:", err.message);
+        console.error(
+          "Error loading product:",
+          err.response?.data || err.message
+        );
+        toast.error("❌ Failed to load product details.");
       }
     };
     fetchProduct();
@@ -29,19 +31,21 @@ const ProductDetailPage = () => {
 
   const handleAddToCart = async () => {
     try {
-      await axios.post(
-        "https://e-comservice.onrender.com/api/users/cart/add", // ✅ correct endpoint
-        { productId: product._id, quantity: 1 }, // ✅ include quantity
-        { withCredentials: true }
-      );
+      await API.post("/users/cart/add", {
+        productId: product._id,
+        quantity: 1,
+      });
       toast.success("✅ Added to cart successfully!");
     } catch (err) {
-      console.error("Failed to add to cart:", err.message);
+      console.error(
+        "Failed to add to cart:",
+        err.response?.data || err.message
+      );
       if (err.response?.status === 401) {
-        toast.warning("⚠️ Please login to add items");
+        toast.warning("⚠️ Please login to add items.");
         navigate("/login");
       } else {
-        toast.error("❌ Failed to add to cart");
+        toast.error("❌ Failed to add to cart.");
       }
     }
   };
@@ -59,7 +63,6 @@ const ProductDetailPage = () => {
             alt={product.name}
             className="h-[400px] w-full object-contain"
           />
-
           <div className="flex gap-4 mt-6 w-full justify-center px-2">
             <button
               onClick={handleAddToCart}

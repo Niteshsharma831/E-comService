@@ -1,7 +1,8 @@
+// src/pages/OrderFormPage.jsx
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
+import API from "../api";
 
 const OrderFormPage = () => {
   const navigate = useNavigate();
@@ -20,10 +21,7 @@ const OrderFormPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    axios
-      .get("https://e-comservice.onrender.com/api/users/profile", {
-        withCredentials: true,
-      })
+    API.get("/users/profile")
       .then((res) => {
         const { name, gender, phone, address } = res.data.user;
         setForm((prev) => ({
@@ -49,7 +47,7 @@ const OrderFormPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    if (!product || !product._id) {
+    if (!product?._id) {
       toast.error("❌ Invalid product details. Please try again.");
       setIsSubmitting(false);
       return;
@@ -61,14 +59,9 @@ const OrderFormPage = () => {
     };
 
     try {
-      await axios.post(
-        "https://e-comservice.onrender.com/api/users/create-order",
-        orderPayload,
-        { withCredentials: true }
-      );
-
+      await API.post("/users/create-order", orderPayload);
       toast.success("✅ Order placed successfully!");
-      navigate("/order-success");
+      navigate("/order-success", { state: { product } });
     } catch (err) {
       console.error("Order Error:", err.response?.data || err.message);
       if (err.response?.status === 401) {
@@ -158,7 +151,6 @@ const OrderFormPage = () => {
               onChange={handleChange}
               className="w-full border p-2 rounded"
             >
-              <option>Select Gender</option>
               <option>Male</option>
               <option>Female</option>
               <option>Other</option>

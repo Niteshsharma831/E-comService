@@ -1,7 +1,8 @@
+// src/pages/admin/Logout.jsx
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "./AdminLayout";
-import axios from "axios";
+import API from "../../api"; // centralized API
 
 const Logout = () => {
   const navigate = useNavigate();
@@ -9,15 +10,16 @@ const Logout = () => {
   useEffect(() => {
     const logoutAdmin = async () => {
       try {
-        await axios.get("https://e-comservice.onrender.com/api/admin/logout", {
-          withCredentials: true, // so the cookie is included
-        });
+        // Call logout endpoint
+        await API.get("/admin/logout"); // Make sure backend route works with GET
+
+        // Clear local storage
+        localStorage.removeItem("admin");
       } catch (err) {
         console.error("Logout failed:", err);
       } finally {
-        setTimeout(() => {
-          navigate("/admin-login");
-        }, 1000);
+        // Redirect immediately
+        navigate("/admin-login", { replace: true });
       }
     };
 

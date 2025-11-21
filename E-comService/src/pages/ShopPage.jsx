@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { Link } from "react-router-dom";
 import { FaCartPlus, FaFilter, FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
@@ -12,13 +12,14 @@ const ShopPage = () => {
   const [loading, setLoading] = useState(true);
   const [showFilter, setShowFilter] = useState(false);
 
+  // ---------------- Add to Cart --------------------
   const handleAddToCart = async (productId) => {
     try {
-      await axios.post(
-        "https://e-comservice.onrender.com/api/users/cart/add",
-        { productId, quantity: 1 },
-        { withCredentials: true }
-      );
+      await API.post("/users/cart/add", {
+        productId,
+        quantity: 1,
+      });
+
       toast.success("✅ Added to cart", {
         position: "top-right",
         autoClose: 2000,
@@ -38,6 +39,7 @@ const ShopPage = () => {
     }
   };
 
+  // ---------------- Filter Config --------------------
   const config = {
     price: { min: 0, max: 100000 },
     subcategories: {
@@ -124,8 +126,10 @@ const ShopPage = () => {
     ratings: [4, 3],
   };
 
+  // ---------------- Filter Apply Function --------------------
   const applyFilters = ({ sub, maxPrice, ratings }) => {
     let temp = [...products];
+
     Object.entries(sub).forEach(([cat, arr]) => {
       if (arr.length > 0) {
         temp = temp.filter((p) =>
@@ -133,22 +137,26 @@ const ShopPage = () => {
         );
       }
     });
+
     temp = temp.filter((p) => p.price <= maxPrice);
+
     if (ratings.length > 0) {
       temp = temp.filter((p) => ratings.some((r) => p.rating >= r));
     }
+
     setFiltered(temp);
   };
 
+  // ---------------- Fetch Products --------------------
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(
-          "https://e-comservice.onrender.com/api/products/getallproducts"
-        );
+        const res = await API.get("/products/getallproducts");
+
         const all = res.data.products || [];
         setProducts(all);
         setFiltered(all);
+
         setTimeout(() => setLoading(false), 1000);
       } catch (err) {
         console.error("Error fetching products:", err.message);
@@ -225,13 +233,16 @@ const ShopPage = () => {
                         className="h-48 w-full object-contain p-4"
                       />
                     </Link>
+
                     <div className="px-4 pb-4">
                       <h3 className="text-lg font-semibold text-gray-800 mb-1">
                         {product.name}
                       </h3>
+
                       <p className="text-sm text-gray-600 mb-2 capitalize">
                         {product.category}
                       </p>
+
                       <ul className="text-sm text-gray-500 mb-3 list-disc ml-5">
                         {(Array.isArray(product.description)
                           ? product.description
@@ -242,10 +253,12 @@ const ShopPage = () => {
                             <li key={i}>{point}</li>
                           ))}
                       </ul>
+
                       <div className="flex justify-between items-center">
                         <span className="text-lg font-bold text-green-700">
                           ₹{product.price}
                         </span>
+
                         {product.discount && (
                           <span className="text-sm text-red-600 font-medium">
                             {product.discount}% off
@@ -253,6 +266,7 @@ const ShopPage = () => {
                         )}
                       </div>
                     </div>
+
                     <button
                       title="Add to Cart"
                       onClick={() => handleAddToCart(product._id)}

@@ -61,12 +61,12 @@ const useIsAdminRoute = () => {
 
 const AppContent = () => {
   const isAdmin = useIsAdminRoute();
-  const maintenanceMode = process.env.REACT_APP_MAINTENANCE === "true";
+  // const maintenanceMode = process.env.REACT_APP_MAINTENANCE === "true";
 
   // ✅ Maintenance mode check
-  if (maintenanceMode && !isAdmin) {
-    return <Maintenance />;
-  }
+  // if (maintenanceMode && !isAdmin) {
+  //   return <Maintenance />;
+  // }
 
   return (
     <>

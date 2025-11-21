@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 import AdminLayout from "./AdminLayout";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import API from "../../api"; // ✅ centralized API
 
 const CLOUD_NAME = "dva8v7gxm";
 const UNSIGNED_PRESET = "admin_dp";
@@ -47,7 +47,7 @@ const CreateAdmin = () => {
         cloudForm.append("file", formData.profilePic);
         cloudForm.append("upload_preset", UNSIGNED_PRESET);
 
-        const { data: cloudData } = await axios.post(
+        const { data: cloudData } = await API.post(
           `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
           cloudForm
         );
@@ -64,10 +64,7 @@ const CreateAdmin = () => {
         profile: imageUrl,
       };
 
-      const { data } = await axios.post(
-        "https://e-comservice.onrender.com/api/admin/create-admin",
-        payload
-      );
+      await API.post("/admin/create-admin", payload);
 
       toast.success("✅ Admin created successfully!");
 

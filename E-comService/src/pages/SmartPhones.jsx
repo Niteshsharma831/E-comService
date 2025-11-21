@@ -1,7 +1,53 @@
+// src/pages/SmartPhones.jsx
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
+import API from "../api"; // centralized axios instance
 import useIsDesktop from "../hooks/useIsDesktop";
+
+const ProductCard = ({ product }) => (
+  <Link
+    to={`/buy/${product._id}`}
+    className="bg-white p-4 shadow-sm rounded-lg hover:shadow-md transition block"
+  >
+    <div className="flex flex-col items-center">
+      <img
+        src={product.image}
+        alt={product.name}
+        className="h-36 w-28 object-contain mb-4"
+      />
+      <h3 className="text-lg font-semibold text-center">{product.name}</h3>
+      <div className="text-sm text-gray-600 mt-1">
+        <span className="text-green-600 font-bold mr-2">
+          {product.rating ? `${product.rating}★` : ""}
+        </span>
+      </div>
+      <ul className="text-sm text-gray-700 list-disc ml-4 mt-2 text-left">
+        {(Array.isArray(product.description)
+          ? product.description
+          : [product.description]
+        ).map((point, i) => (
+          <li key={i}>{point}</li>
+        ))}
+      </ul>
+      <div className="text-xs text-gray-500 mt-2 text-center">
+        1 Year Warranty for Device & 6 Months for Inbox Accessories
+      </div>
+      <div className="mt-4 text-center">
+        <div className="text-lg font-bold text-gray-800">₹{product.price}</div>
+        {product.originalPrice && (
+          <>
+            <div className="text-sm text-gray-500 line-through">
+              ₹{product.originalPrice}
+            </div>
+            <div className="text-sm text-green-600">
+              {product.discount}% off
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  </Link>
+);
 
 const SmartPhones = () => {
   const [products, setProducts] = useState([]);
@@ -10,18 +56,17 @@ const SmartPhones = () => {
   const [selectedRatings, setSelectedRatings] = useState([]);
   const [maxPrice, setMaxPrice] = useState(100000);
   const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const isDesktop = useIsDesktop();
 
   const allBrands = ["realme", "samsung", "poco", "vivo", "motorola"];
-  const allRatings = ["4", "3"];
+  const allRatings = [4, 3];
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(
-          "https://e-comservice.onrender.com/api/products/getallproducts"
-        );
+        const res = await API.get("/products/getallproducts");
         const phones = res.data.products.filter(
           (product) =>
             product.category.toLowerCase() === "smartphones" &&
@@ -30,7 +75,12 @@ const SmartPhones = () => {
         setProducts(phones);
         setFilteredProducts(phones);
       } catch (err) {
-        console.error("Error fetching products:", err.message);
+        console.error(
+          "Error fetching products:",
+          err.response?.data || err.message
+        );
+      } finally {
+        setLoading(false);
       }
     };
     fetchProducts();
@@ -42,7 +92,7 @@ const SmartPhones = () => {
         selectedBrands.length === 0 || selectedBrands.includes(product.brand);
       const matchesRating =
         selectedRatings.length === 0 ||
-        selectedRatings.some((r) => (product.rating || 0) >= parseFloat(r));
+        selectedRatings.some((r) => (product.rating || 0) >= Number(r));
       const matchesPrice = product.price <= maxPrice;
       return matchesBrand && matchesRating && matchesPrice;
     });
@@ -62,6 +112,14 @@ const SmartPhones = () => {
         : [...prev, rating]
     );
   };
+
+  if (loading) {
+    return (
+      <div className="text-center mt-24 text-gray-500">
+        Loading smartphones...
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col lg:flex-row w-full bg-gray-50 mt-24">
@@ -143,55 +201,7 @@ const SmartPhones = () => {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
-              <Link
-                to={`/buy/${product._id}`}
-                key={product._id}
-                className="bg-white p-4 shadow-sm rounded-lg hover:shadow-md transition block"
-              >
-                <div className="flex flex-col items-center">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="h-36 w-28 object-contain mb-4"
-                  />
-
-                  <h3 className="text-lg font-semibold text-center">
-                    {product.name}
-                  </h3>
-                  <div className="text-sm text-gray-600 mt-1">
-                    <span className="text-green-600 font-bold mr-2">
-                      {product.rating ? `${product.rating}★` : ""}
-                    </span>
-                  </div>
-                  <ul className="text-sm text-gray-700 list-disc ml-4 mt-2 text-left">
-                    {(Array.isArray(product.description)
-                      ? product.description
-                      : [product.description]
-                    ).map((point, i) => (
-                      <li key={i}>{point}</li>
-                    ))}
-                  </ul>
-                  <div className="text-xs text-gray-500 mt-2 text-center">
-                    1 Year Warranty for Device & 6 Months for Inbox Accessories
-                  </div>
-
-                  <div className="mt-4 text-center">
-                    <div className="text-lg font-bold text-gray-800">
-                      ₹{product.price}
-                    </div>
-                    {product.originalPrice && (
-                      <>
-                        <div className="text-sm text-gray-500 line-through">
-                          ₹{product.originalPrice}
-                        </div>
-                        <div className="text-sm text-green-600">
-                          {product.discount}% off
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </Link>
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         )}

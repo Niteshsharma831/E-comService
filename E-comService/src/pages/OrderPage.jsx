@@ -1,5 +1,6 @@
+// MyOrdersPage.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api"; // <-- use your API instance
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaBoxOpen, FaChevronDown, FaChevronUp } from "react-icons/fa";
@@ -11,32 +12,29 @@ const MyOrdersPage = () => {
   const [expandedOrderId, setExpandedOrderId] = useState(null);
   const navigate = useNavigate();
 
-  const fetchOrders = () => {
+  // ✅ Fetch orders
+  const fetchOrders = async () => {
     setLoading(true);
-    axios
-      .get("https://e-comservice.onrender.com/api/users/mine", {
-        withCredentials: true,
-      })
-      .then((res) => {
-        setOrders(res.data.orders || []);
-      })
-      .catch(() => {
-        toast.error("❌ Failed to load orders");
-      })
-      .finally(() => setLoading(false));
+    try {
+      const res = await API.get("/users/mine"); // use API instance
+      setOrders(res.data.orders || []);
+    } catch (err) {
+      toast.error("❌ Failed to load orders");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
+  // ✅ Cancel order
   const handleCancel = async (orderId) => {
     try {
-      const res = await axios.put(
-        `https://e-comservice.onrender.com/api/users/update-status/${orderId}`,
-        { status: "Cancelled" },
-        { withCredentials: true }
-      );
+      const res = await API.put(`/users/update-status/${orderId}`, {
+        status: "Cancelled",
+      });
       toast.success(res.data.message || "✅ Order cancelled successfully");
       fetchOrders();
     } catch (err) {
@@ -215,7 +213,6 @@ const MyOrdersPage = () => {
             ))}
           </div>
 
-          {/* ✅ Continue Shopping Button after list */}
           <div className="mt-12 text-center">
             <motion.button
               whileHover={{ scale: 1.05 }}

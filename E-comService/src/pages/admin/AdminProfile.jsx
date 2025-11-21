@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
-import axios from "axios";
 import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
+import API from "../../api"; // ✅ use centralized API
 
 const AdminProfile = () => {
   const [admin, setAdmin] = useState(null);
@@ -9,11 +9,8 @@ const AdminProfile = () => {
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
-        const res = await axios.get(
-          "https://e-comservice.onrender.com/api/admin/admin-profile",
-          { withCredentials: true }
-        );
-        setAdmin(res.data.admin);
+        const { data } = await API.get("/admin/admin-profile"); // using centralized API
+        setAdmin(data.admin);
       } catch (error) {
         console.error("Error fetching admin:", error);
       }
@@ -27,12 +24,10 @@ const AdminProfile = () => {
   return (
     <AdminLayout>
       <div className="min-h-screen bg-gray-100 px-6 py-12">
-        {/* Heading */}
         <h1 className="text-4xl font-extrabold text-center text-indigo-700 mb-10">
           👤 Admin Profile
         </h1>
 
-        {/* Profile Card */}
         <div className="flex justify-center">
           <div className="bg-white shadow-2xl rounded-xl overflow-hidden flex flex-col md:flex-row w-full max-w-5xl">
             {/* Left Section */}

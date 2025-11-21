@@ -1,21 +1,25 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api"; // ⬅ use axios instance
 import { Link } from "react-router-dom";
 import { FaCartPlus } from "react-icons/fa";
 import FilterPage from "../components/FilterPage";
 import { toast, ToastContainer } from "react-toastify";
+
 const ElectronicPage = () => {
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ----------------------------
+  // ADD TO CART
+  // ----------------------------
   const handleAddToCart = async (productId) => {
     try {
-      await axios.post(
-        "https://e-comservice.onrender.com/api/users/cart/add",
-        { productId, quantity: 1 },
-        { withCredentials: true }
-      );
+      await API.post("/users/cart/add", {
+        productId,
+        quantity: 1,
+      });
+
       toast.success("✅ Added to cart");
     } catch (err) {
       if (err.response?.status === 401) {
@@ -25,6 +29,10 @@ const ElectronicPage = () => {
       }
     }
   };
+
+  // ----------------------------
+  // FILTER CONFIG
+  // ----------------------------
   const config = {
     price: { min: 0, max: 150000 },
     subcategories: {
@@ -84,6 +92,9 @@ const ElectronicPage = () => {
     ratings: [4, 3],
   };
 
+  // ----------------------------
+  // APPLY FILTERS
+  // ----------------------------
   const applyFilters = ({ sub, maxPrice, ratings }) => {
     let temp = [...products];
 
@@ -104,15 +115,17 @@ const ElectronicPage = () => {
     setFiltered(temp);
   };
 
+  // ----------------------------
+  // FETCH ELECTRONICS
+  // ----------------------------
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(
-          "https://e-comservice.onrender.com/api/products/getallproducts"
-        );
-        const allProducts = res.data.products || [];
+        const res = await API.get("/products/getallproducts");
 
-        const filtered = allProducts.filter((product) => {
+        const all = res.data.products || [];
+
+        const electronicItems = all.filter((product) => {
           const category = product.category?.toLowerCase() || "";
           return (
             category.includes("electronic") ||
@@ -124,8 +137,9 @@ const ElectronicPage = () => {
           );
         });
 
-        setProducts(filtered);
-        setFiltered(filtered);
+        setProducts(electronicItems);
+        setFiltered(electronicItems);
+
         setTimeout(() => setLoading(false), 1000);
       } catch (err) {
         console.error("Error fetching electronic products:", err.message);
@@ -137,6 +151,9 @@ const ElectronicPage = () => {
     fetchProducts();
   }, []);
 
+  // ----------------------------
+  // UI
+  // ----------------------------
   return (
     <div className="min-h-screen bg-gray-50 pt-20 mt-10">
       {loading ? (
@@ -145,14 +162,15 @@ const ElectronicPage = () => {
         </div>
       ) : (
         <div className="flex h-[calc(100vh-80px)] overflow-hidden">
-          {/* Sidebar Filter */}
+          {/* LEFT FILTER SIDEBAR */}
           <div className="w-64 hidden lg:block sticky top-20 h-full overflow-y-auto p-4 bg-white shadow">
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
 
-          {/* Product Listing */}
+          {/* PRODUCT LISTING */}
           <div className="flex-1 overflow-y-auto p-4">
             <h2 className="text-2xl font-bold mb-4">Electronic Products</h2>
+
             {filtered.length === 0 ? (
               <div className="text-gray-500 text-lg font-medium">
                 No electronic products found.
@@ -171,13 +189,16 @@ const ElectronicPage = () => {
                         className="h-48 w-full object-contain p-4"
                       />
                     </Link>
+
                     <div className="px-4 pb-4">
                       <h3 className="text-lg font-semibold text-gray-800 mb-1">
                         {product.name}
                       </h3>
+
                       <p className="text-sm text-gray-600 mb-2 capitalize">
                         {product.category}
                       </p>
+
                       <ul className="text-sm text-gray-500 mb-3 list-disc ml-5">
                         {(Array.isArray(product.description)
                           ? product.description
@@ -188,10 +209,12 @@ const ElectronicPage = () => {
                             <li key={i}>{point}</li>
                           ))}
                       </ul>
+
                       <div className="flex justify-between items-center">
                         <span className="text-lg font-bold text-green-700">
                           ₹{product.price}
                         </span>
+
                         {product.discount && (
                           <span className="text-sm text-red-600 font-medium">
                             {product.discount}% off
@@ -199,6 +222,7 @@ const ElectronicPage = () => {
                         )}
                       </div>
                     </div>
+
                     <button
                       title="Add to Cart"
                       onClick={() => handleAddToCart(product._id)}
@@ -213,6 +237,7 @@ const ElectronicPage = () => {
           </div>
         </div>
       )}
+
       <ToastContainer />
     </div>
   );

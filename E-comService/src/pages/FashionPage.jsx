@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { Link } from "react-router-dom";
 import { FaCartPlus, FaFilter, FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
@@ -11,13 +11,14 @@ const FashionPage = () => {
   const [loading, setLoading] = useState(true);
   const [showFilter, setShowFilter] = useState(false);
 
+  // ➤ ADD TO CART (Auto Localhost + Live)
   const handleAddToCart = async (productId) => {
     try {
-      await axios.post(
-        "https://e-comservice.onrender.com/api/users/cart/add",
-        { productId, quantity: 1 },
-        { withCredentials: true }
-      );
+      await API.post("/users/cart/add", {
+        productId,
+        quantity: 1,
+      });
+
       toast.success("✅ Added to cart");
     } catch (err) {
       if (err.response?.status === 401) {
@@ -28,6 +29,7 @@ const FashionPage = () => {
     }
   };
 
+  // ➤ FILTER CONFIG
   const config = {
     price: { min: 0, max: 5000 },
     subcategories: {
@@ -93,17 +95,18 @@ const FashionPage = () => {
     setFiltered(temp);
   };
 
+  // ➤ FETCH PRODUCTS (Auto Localhost + Live)
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(
-          "https://e-comservice.onrender.com/api/products/getallproducts"
-        );
+        const res = await API.get("/products/getallproducts");
+
         const all = res.data.products || [];
 
-        const filtered = all.filter((product) => {
+        const filteredProducts = all.filter((product) => {
           const name = product.name?.toLowerCase() || "";
           const category = product.category?.toLowerCase() || "";
+
           return (
             category.includes("fashion") ||
             category.includes("clothing") ||
@@ -116,11 +119,10 @@ const FashionPage = () => {
           );
         });
 
-        setProducts(filtered);
-        setFiltered(filtered);
-        setTimeout(() => setLoading(false), 1000);
+        setProducts(filteredProducts);
+        setFiltered(filteredProducts);
+        setLoading(false);
       } catch (err) {
-        console.error("Error fetching fashion products:", err.message);
         toast.error("❌ Failed to load fashion products");
         setLoading(false);
       }
@@ -131,20 +133,11 @@ const FashionPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24 px-4">
-      {/* Filter Button */}
-      {/* Fixed Filter Button for Mobile */}
-      {showFilter && (
-        <div className="fixed inset-0 z-50 flex">
-          {/* Drawer and Overlay */}
-          ...
-        </div>
-      )}
-
-      {/* ✅ Add this below */}
+      {/* MOBILE FILTER BUTTON */}
       <div className="fixed top-22 left-4 z-50 lg:hidden">
         <button
           onClick={() => setShowFilter(true)}
-          className="flex items-center gap-1 bg-[#6B46FF] text-white px-3 py-2 text-sm rounded shadow-md hover:bg-[#5a3ee6] transition"
+          className="flex items-center gap-1 bg-[#6B46FF] text-white px-3 py-2 text-sm rounded shadow-md hover:bg-[#5a3ee6]"
         >
           <FaFilter size={14} />
           Filter
@@ -157,12 +150,12 @@ const FashionPage = () => {
         </div>
       ) : (
         <div className="flex h-[calc(100vh-150px)] overflow-hidden">
-          {/* Desktop Sidebar */}
+          {/* DESKTOP SIDEBAR */}
           <div className="w-64 hidden lg:block sticky top-20 h-full overflow-y-auto p-4 bg-white shadow">
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
 
-          {/* Product Listing */}
+          {/* PRODUCT LISTING */}
           <div className="flex-1 overflow-y-auto p-4">
             <h2 className="text-2xl font-bold mb-4">Fashion Collection</h2>
 
@@ -184,6 +177,7 @@ const FashionPage = () => {
                         className="h-48 w-full object-contain p-4"
                       />
                     </Link>
+
                     <div className="px-4 pb-4">
                       <h3 className="text-lg font-semibold text-gray-800 mb-1">
                         {product.name}
@@ -191,6 +185,7 @@ const FashionPage = () => {
                       <p className="text-sm text-gray-600 mb-2 capitalize">
                         {product.category}
                       </p>
+
                       <ul className="text-sm text-gray-500 mb-3 list-disc ml-5">
                         {(Array.isArray(product.description)
                           ? product.description
@@ -201,6 +196,7 @@ const FashionPage = () => {
                             <li key={i}>{point}</li>
                           ))}
                       </ul>
+
                       <div className="flex justify-between items-center">
                         <span className="text-lg font-bold text-green-700">
                           ₹{product.price}
@@ -212,6 +208,7 @@ const FashionPage = () => {
                         )}
                       </div>
                     </div>
+
                     <button
                       title="Add to Cart"
                       onClick={() => handleAddToCart(product._id)}
@@ -227,10 +224,9 @@ const FashionPage = () => {
         </div>
       )}
 
-      {/* Mobile Filter Drawer */}
+      {/* MOBILE FILTER DRAWER */}
       {showFilter && (
         <div className="fixed inset-0 z-50 flex">
-          {/* Filter Drawer */}
           <div className="w-72 bg-white shadow-lg p-4 overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Filters</h2>
@@ -241,16 +237,17 @@ const FashionPage = () => {
                 <FaTimes size={20} />
               </button>
             </div>
+
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
 
-          {/* Overlay */}
           <div
             className="flex-1 bg-black bg-opacity-30"
             onClick={() => setShowFilter(false)}
           />
         </div>
       )}
+
       <ToastContainer />
     </div>
   );

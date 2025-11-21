@@ -1,8 +1,9 @@
+// src/pages/ProductManagement.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import AdminLayout from "./AdminLayout";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import API from "../../api"; // <-- import API instance
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
@@ -14,9 +15,7 @@ const ProductManagement = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(
-        "https://e-comservice.onrender.com/api/products/getallproducts"
-      );
+      const res = await API.get("/products/getallproducts");
       setProducts(res.data.products || []);
     } catch (err) {
       console.error("Failed to fetch products:", err);
@@ -30,9 +29,7 @@ const ProductManagement = () => {
     if (!window.confirm("Are you sure you want to delete this product?"))
       return;
     try {
-      await axios.delete(
-        `https://e-comservice.onrender.com/api/products/deleteproducts/${id}`
-      );
+      await API.delete(`/products/deleteproducts/${id}`);
       setProducts((prev) => prev.filter((p) => p._id !== id));
       toast.success("Product deleted");
     } catch (err) {

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import API from "../api"; // 🔥 IMPORTANT
 
 const CLOUD_NAME = "dva8v7gxm";
 const UNSIGNED_PRESET = "admin_dp";
@@ -22,110 +22,80 @@ const Register = () => {
 
   const [errors, setErrors] = useState({});
   const [previewImage, setPreviewImage] = useState("");
-  const [loading, setLoading] = useState(false); // ✅ loading state
+  const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name || formData.name.length < 3) {
-      newErrors.name = "Name must be at least 3 characters";
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email || !emailRegex.test(formData.email)) {
-      newErrors.email = "Invalid email address";
-    }
-
-    if (!formData.password || formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    if (!formData.address) {
-      newErrors.address = "Address is required";
-    }
-
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!formData.phone || !phoneRegex.test(formData.phone)) {
-      newErrors.phone = "Phone must be 10 digits";
-    }
-
-    if (!formData.gender) {
-      newErrors.gender = "Gender is required";
-    }
+    if (!formData.name) newErrors.name = "Name required";
+    if (!formData.email) newErrors.email = "Email required";
+    if (!formData.password) newErrors.password = "Password required";
+    if (!formData.address) newErrors.address = "Address required";
+    if (!formData.phone) newErrors.phone = "Phone required";
+    if (!formData.gender) newErrors.gender = "Gender required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    setFormData((prev) => ({ ...prev, profilePic: file }));
-    setPreviewImage(file ? URL.createObjectURL(file) : "");
+    setFormData({ ...formData, profilePic: file });
+    if (file) setPreviewImage(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validateForm()) return;
 
     try {
-      setLoading(true); // ✅ Start loader
+      setLoading(true);
 
       let imageUrl = "";
 
       if (formData.profilePic) {
-        const cloudForm = new FormData();
-        cloudForm.append("file", formData.profilePic);
-        cloudForm.append("upload_preset", UNSIGNED_PRESET);
+        const form = new FormData();
+        form.append("file", formData.profilePic);
+        form.append("upload_preset", UNSIGNED_PRESET);
 
-        const { data: cloudData } = await axios.post(
+        const uploadRes = await fetch(
           `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-          cloudForm
+          { method: "POST", body: form }
         );
-        imageUrl = cloudData.secure_url;
+
+        const uploadData = await uploadRes.json();
+        imageUrl = uploadData.secure_url;
       }
 
       const payload = {
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        address: formData.address,
         phone: formData.phone,
         gender: formData.gender,
-        address: formData.address,
         profile: imageUrl,
       };
 
-      await axios.post("https://e-comservice.onrender.com/api/users/create", payload);
+      // 💥 FIXED — USE API, NOT DIRECT AXIOS
+      await API.post("/users/create", payload);
 
-      toast.success("✅ Registration successful!");
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        address: "",
-        phone: "",
-        gender: "",
-        profilePic: null,
-      });
-      setPreviewImage("");
-
-      setTimeout(() => {
-        setLoading(false); // ✅ Stop loader
-        navigate("/login");
-      }, 2000);
-    } catch (err) {
-      setLoading(false); // ✅ Stop loader on error
-
-      if (err.response && err.response.status === 409) {
-        toast.error("❌ Account already registered. Please login.");
+      toast.success("Registration Successful!");
+      setTimeout(() => navigate("/login"), 1500);
+    } catch (error) {
+      if (error.response?.status === 409) {
+        toast.error("User already exists!");
       } else {
-        toast.error("❌ Registration failed. Please try again.");
+        toast.error("Registration failed!");
       }
-      console.error(err);
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 

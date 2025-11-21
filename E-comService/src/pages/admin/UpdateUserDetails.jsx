@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AdminLayout from "./AdminLayout";
+import API from "../../api"; // Axios instance
 
 const UpdateUserDetails = () => {
   const { userId } = useParams();
@@ -12,26 +12,28 @@ const UpdateUserDetails = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: "",
     address: "",
     phone: "",
   });
-  const [errors, setErrors] = useState({});
 
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  // Form validation
   const validateForm = () => {
     const newErrors = {};
 
-    if (formData.name && formData.name.length < 3) {
+    if (!formData.name || formData.name.length < 3) {
       newErrors.name = "Name must be at least 3 characters";
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.email && !emailRegex.test(formData.email)) {
+    if (!formData.email || !emailRegex.test(formData.email)) {
       newErrors.email = "Invalid email";
     }
 
     const phoneRegex = /^[0-9]{10}$/;
-    if (formData.phone && !phoneRegex.test(formData.phone)) {
+    if (!formData.phone || !phoneRegex.test(formData.phone)) {
       newErrors.phone = "Phone must be 10 digits";
     }
 
@@ -39,39 +41,38 @@ const UpdateUserDetails = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    try {
-      await axios.put(
-        `https://e-comservice.onrender.com/api/users/update/${userId}`,
-        formData
-      );
-      toast.success("✅ User updated successfully");
+    setLoading(true);
 
-      setTimeout(() => {
-        navigate("/admin/dashboard");
-      }, 2000); // wait for 2 seconds before redirecting
+    try {
+      await API.put(`/users/update/${userId}`, formData);
+      toast.success("✅ User updated successfully");
+      setTimeout(() => navigate("/admin/dashboard"), 2000);
     } catch (err) {
       toast.error("❌ Update failed");
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Fetch user data on mount
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(
-          `https://e-comservice.onrender.com/api/users/${userId}`
-        );
+        const res = await API.get(`/users/${userId}`);
         const { name, email, address, phone } = res.data;
-        setFormData({ name, email, password: "", address, phone });
+        setFormData({ name, email, address, phone });
       } catch (error) {
         toast.error("❌ Failed to load user");
         console.error("Error loading user:", error);
@@ -90,67 +91,38 @@ const UpdateUserDetails = () => {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4 text-gray-700">
-            <div>
-              <label>Full Name</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-4 py-2 mt-1 border rounded-md"
-              />
-              {errors.name && (
-                <p className="text-sm text-red-600">{errors.name}</p>
-              )}
-            </div>
-
-            <div>
-              <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-2 mt-1 border rounded-md"
-              />
-              {errors.email && (
-                <p className="text-sm text-red-600">{errors.email}</p>
-              )}
-            </div>
-
-            <div>
-              <label>Address</label>
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                className="w-full px-4 py-2 mt-1 border rounded-md"
-              />
-              {errors.address && (
-                <p className="text-sm text-red-600">{errors.address}</p>
-              )}
-            </div>
-
-            <div>
-              <label>Phone</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full px-4 py-2 mt-1 border rounded-md"
-              />
-              {errors.phone && (
-                <p className="text-sm text-red-600">{errors.phone}</p>
-              )}
-            </div>
+            {["name", "email", "address", "phone"].map((field) => (
+              <div key={field}>
+                <label className="capitalize">{field}</label>
+                <input
+                  type={
+                    field === "email"
+                      ? "email"
+                      : field === "phone"
+                      ? "tel"
+                      : "text"
+                  }
+                  name={field}
+                  value={formData[field]}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+                {errors[field] && (
+                  <p className="text-sm text-red-600 mt-1">{errors[field]}</p>
+                )}
+              </div>
+            ))}
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+              disabled={loading}
+              className={`w-full py-2 rounded-md text-white font-semibold transition ${
+                loading
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
             >
-              Update
+              {loading ? "Updating..." : "Update"}
             </button>
           </form>
         </div>

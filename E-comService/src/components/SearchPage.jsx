@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
-import axios from "axios";
 import { FaCartPlus, FaFilter, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import FilterPage from "../components/FilterPage";
+import API from "../api"; // Use API instance
 
 const SearchPage = () => {
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFilter, setShowFilter] = useState(false);
-  const query = new URLSearchParams(useLocation().search).get("q");
+  const query = new URLSearchParams(useLocation().search).get("q") || "";
 
   const config = {
     price: { min: 0, max: 100000 },
@@ -46,27 +46,29 @@ const SearchPage = () => {
 
   const applyFilters = ({ sub, maxPrice, ratings }) => {
     let temp = [...products];
+
     Object.entries(sub).forEach(([cat, arr]) => {
       if (arr.length > 0) {
-        temp = temp.filter((p) =>
-          p.tags?.some((tag) => arr.includes(tag.toLowerCase()))
+        temp = temp.filter(
+          (p) =>
+            Array.isArray(p.tags) &&
+            p.tags.some((tag) => arr.includes(tag.toLowerCase()))
         );
       }
     });
+
     temp = temp.filter((p) => p.price <= maxPrice);
+
     if (ratings.length > 0) {
       temp = temp.filter((p) => ratings.some((r) => p.rating >= r));
     }
+
     setFiltered(temp);
   };
 
   const handleAddToCart = async (productId) => {
     try {
-      await axios.post(
-        "https://e-comservice.onrender.com/api/users/cart/add",
-        { productId, quantity: 1 },
-        { withCredentials: true }
-      );
+      await API.post("/users/cart/add", { productId, quantity: 1 });
       toast.success("✅ Added to cart");
     } catch (err) {
       if (err.response?.status === 401) {
@@ -79,30 +81,32 @@ const SearchPage = () => {
 
   useEffect(() => {
     const fetchResults = async () => {
+      setLoading(true);
       try {
-        const res = await axios.get(
-          "https://e-comservice.onrender.com/api/products/getallproducts"
-        );
+        const res = await API.get("/products/getallproducts");
         const allProducts = res.data.products || [];
-        const term = query?.toLowerCase() || "";
+        const term = query.toLowerCase();
 
-        const matched = allProducts.filter(
-          (p) =>
+        const matched = allProducts.filter((p) => {
+          const descriptionArray = Array.isArray(p.description)
+            ? p.description
+            : [p.description || ""];
+          const tagsArray = Array.isArray(p.tags) ? p.tags : [];
+          return (
             p.name?.toLowerCase().includes(term) ||
             p.brand?.toLowerCase().includes(term) ||
             p.category?.toLowerCase().includes(term) ||
-            (Array.isArray(p.description) &&
-              p.description.some((d) => d.toLowerCase().includes(term))) ||
-            (Array.isArray(p.tags) &&
-              p.tags.some((tag) => tag.toLowerCase().includes(term)))
-        );
+            descriptionArray.some((d) => d.toLowerCase().includes(term)) ||
+            tagsArray.some((tag) => tag.toLowerCase().includes(term))
+          );
+        });
 
         setProducts(matched);
         setFiltered(matched);
-        setTimeout(() => setLoading(false), 500);
       } catch (error) {
         console.error("Search error:", error.message);
         toast.error("❌ Failed to load search results");
+      } finally {
         setLoading(false);
       }
     };
@@ -134,12 +138,10 @@ const SearchPage = () => {
         </div>
       ) : (
         <div className="flex h-[calc(100vh-100px)]">
-          {/* Sidebar Filter on Desktop */}
           <div className="hidden lg:block w-64 sticky top-24 h-[calc(100vh-100px)] overflow-y-auto p-4 bg-white shadow">
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
 
-          {/* Product Listing Area */}
           <div className="flex-1 overflow-y-auto px-2">
             {filtered.length === 0 ? (
               <div className="text-center text-gray-500 text-lg font-medium min-h-[400px] flex items-center justify-center">
@@ -159,7 +161,6 @@ const SearchPage = () => {
                         className="h-48 w-full object-contain p-4"
                       />
                     </Link>
-
                     <div className="px-4 pb-4">
                       <h3 className="text-lg font-semibold text-gray-800 mb-1">
                         {product.name}
@@ -170,7 +171,7 @@ const SearchPage = () => {
                       <ul className="text-sm text-gray-500 mb-3 list-disc ml-5">
                         {(Array.isArray(product.description)
                           ? product.description
-                          : [product.description]
+                          : [product.description || ""]
                         )
                           .slice(0, 4)
                           .map((point, i) => (
@@ -207,7 +208,6 @@ const SearchPage = () => {
         </div>
       )}
 
-      {/* Mobile Filter Drawer */}
       {showFilter && (
         <div className="fixed inset-0 z-50 flex">
           <div className="w-72 bg-white shadow-lg p-4 overflow-y-auto">
