@@ -52,6 +52,7 @@ import MyOrdersPage from "./pages/OrderPage";
 
 // Utilities
 import ScrollToTop from "./hooks/ScrollToTop";
+import RazorpayPayment from "./pages/RazorpayPayment";
 
 // ✅ Detect if on admin route
 const useIsAdminRoute = () => {
@@ -136,6 +137,14 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <MyOrdersPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/razorpay-payment"
+          element={
+            <PrivateRoute>
+              <RazorpayPayment />
             </PrivateRoute>
           }
         />

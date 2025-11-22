@@ -1,4 +1,3 @@
-// src/pages/ProductDetailPage.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -26,10 +25,14 @@ const ProductDetailPage = () => {
   }, [id]);
 
   const handleBuyNow = () => {
-    navigate("/order", { state: { product } });
+    if (!product) return;
+    // Pass product as orderPayload for Razorpay page
+    const orderPayload = { productId: product._id, price: product.price };
+    navigate("/order", { state: { product, orderPayload } });
   };
 
   const handleAddToCart = async () => {
+    if (!product) return;
     try {
       await API.post("/users/cart/add", {
         productId: product._id,
@@ -59,7 +62,7 @@ const ProductDetailPage = () => {
         {/* Left - Image and Buttons */}
         <div className="w-full lg:w-1/2 flex flex-col items-center">
           <img
-            src={product.image}
+            src={product.image || "/placeholder.png"}
             alt={product.name}
             className="h-[400px] w-full object-contain"
           />
@@ -116,7 +119,9 @@ const ProductDetailPage = () => {
               <ul className="list-disc text-gray-600 text-sm ml-5">
                 {(Array.isArray(product.description)
                   ? product.description
-                  : [product.description]
+                  : product.description
+                  ? [product.description]
+                  : []
                 ).map((item, index) => (
                   <li key={index}>{item}</li>
                 ))}

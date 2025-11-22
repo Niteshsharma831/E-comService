@@ -1,4 +1,3 @@
-// src/pages/OrderFormPage.jsx
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -15,11 +14,12 @@ const OrderFormPage = () => {
     phone: "",
     address: "",
     pincode: "",
-    paymentMethod: "COD",
+    paymentMethod: "COD", // ⭐ Default is COD
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Auto-fill user details
   useEffect(() => {
     API.get("/users/profile")
       .then((res) => {
@@ -27,7 +27,7 @@ const OrderFormPage = () => {
         setForm((prev) => ({
           ...prev,
           fullName: name || "",
-          gender: gender || "Male",
+          gender: gender || "Gender",
           phone: phone || "",
           address: address || "",
         }));
@@ -43,6 +43,7 @@ const OrderFormPage = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Submit order
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -59,17 +60,18 @@ const OrderFormPage = () => {
     };
 
     try {
-      await API.post("/users/create-order", orderPayload);
-      toast.success("✅ Order placed successfully!");
-      navigate("/order-success", { state: { product } });
+      if (form.paymentMethod === "COD") {
+        // COD Order
+        await API.post("/users/create-order", orderPayload);
+        toast.success("✅ Order placed successfully!");
+        navigate("/order-success", { state: { product } });
+      } else {
+        // ONLINE PAYMENT
+        navigate("/razorpay-payment", { state: { orderPayload, product } });
+      }
     } catch (err) {
       console.error("Order Error:", err.response?.data || err.message);
-      if (err.response?.status === 401) {
-        toast.warning("⚠️ Please login to place order.");
-        navigate("/login");
-      } else {
-        toast.error("❌ Failed to place order. Try again.");
-      }
+      toast.error("❌ Failed to place order. Try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -77,7 +79,7 @@ const OrderFormPage = () => {
 
   const calculateDiscountedPrice = () => {
     const price = product?.price || 0;
-    const discount = 2940;
+    const discount = 20;
     return price - discount;
   };
 
@@ -89,6 +91,7 @@ const OrderFormPage = () => {
           <h2 className="text-xl font-semibold border-b pb-3 mb-4">
             📦 Order Summary
           </h2>
+
           <div className="flex items-center gap-4 mb-4">
             <img
               src={product?.image}
@@ -108,6 +111,7 @@ const OrderFormPage = () => {
               </p>
             </div>
           </div>
+
           <div className="text-sm space-y-2">
             <div className="flex justify-between">
               <span>Price</span>
@@ -115,7 +119,7 @@ const OrderFormPage = () => {
             </div>
             <div className="flex justify-between text-green-600">
               <span>Discount</span>
-              <span>- ₹2940</span>
+              <span>- ₹20</span>
             </div>
             <div className="flex justify-between text-blue-600">
               <span>Delivery Charges</span>
@@ -134,6 +138,7 @@ const OrderFormPage = () => {
           <h2 className="text-xl font-semibold border-b pb-3 mb-4">
             📝 Enter Delivery Details
           </h2>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
@@ -185,6 +190,7 @@ const OrderFormPage = () => {
               className="w-full border p-2 rounded"
             />
 
+            {/* Payment Method */}
             <div>
               <label className="block font-semibold mb-1">
                 Payment Method:
@@ -200,24 +206,33 @@ const OrderFormPage = () => {
                   />
                   Cash on Delivery
                 </label>
-                <label className="flex items-center gap-2 text-gray-400">
+
+                <label className="flex items-center gap-2">
                   <input
                     type="radio"
                     name="paymentMethod"
                     value="Online"
-                    disabled
+                    checked={form.paymentMethod === "Online"}
+                    onChange={handleChange}
                   />
                   Online Payment
                 </label>
               </div>
             </div>
 
+            {/* ⭐ Dynamic Button Label */}
             <button
               type="submit"
               disabled={isSubmitting}
               className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
             >
-              ✅ {isSubmitting ? "Placing Order..." : "Place Order"}
+              {form.paymentMethod === "Online"
+                ? isSubmitting
+                  ? "Processing Payment..."
+                  : "💳 Make Payment"
+                : isSubmitting
+                ? "Processing..."
+                : "✅ Place Order"}
             </button>
           </form>
         </div>

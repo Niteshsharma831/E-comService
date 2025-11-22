@@ -1,4 +1,14 @@
-require("dotenv").config();
+const dotenv = require("dotenv");
+
+// -----------------------------------------
+// Load environment variables based on NODE_ENV
+// -----------------------------------------
+if (process.env.NODE_ENV === "production") {
+  dotenv.config({ path: ".env.production" });
+} else {
+  dotenv.config({ path: ".env.development" });
+}
+
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
@@ -6,12 +16,14 @@ const port = process.env.PORT || 3000;
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
+// -----------------------------------------
 // Database Connection
+// -----------------------------------------
 const connectDB = require("./config/db");
 connectDB();
 
 // -----------------------------------------
-// ✅ CORS Setup for Localhost + Live Frontend
+// CORS Setup for Localhost + Live Frontend
 // -----------------------------------------
 const allowedOrigins = [
   "http://localhost:3000", // React Local
@@ -45,10 +57,12 @@ app.use(cookieParser());
 const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // -----------------------------------------
 // Health Check
