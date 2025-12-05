@@ -4,6 +4,7 @@ import { FaCartPlus, FaFilter, FaTimes, FaStar } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import FilterPage from "../components/FilterPage";
 import API from "../api"; // API instance
+import "react-toastify/dist/ReactToastify.css";
 
 const GroceryPage = () => {
   const [products, setProducts] = useState([]);
@@ -51,6 +52,7 @@ const GroceryPage = () => {
     if (ratings.length)
       temp = temp.filter((p) => ratings.some((r) => p.rating >= r));
     setFiltered(temp);
+    setShowFilter(false); // close drawer on apply
   };
 
   // ➤ FETCH PRODUCTS
@@ -66,11 +68,9 @@ const GroceryPage = () => {
             category.includes("grocery") ||
             category.includes("food") ||
             category.includes("daily needs") ||
-            name.includes("rice") ||
-            name.includes("atta") ||
-            name.includes("dal") ||
-            name.includes("oil") ||
-            name.includes("grocery")
+            ["rice", "atta", "dal", "oil", "grocery"].some((keyword) =>
+              name.includes(keyword)
+            )
           );
         });
         setProducts(groceryFiltered);
@@ -85,7 +85,6 @@ const GroceryPage = () => {
 
     fetchProducts();
 
-    // Detect small screen
     const handleResize = () => setIsSmall(window.innerWidth < 768);
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -94,14 +93,20 @@ const GroceryPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-[84px] px-4">
-      {/* Header */}
+      {/* MOBILE FILTER BUTTON */}
+      {isSmall && !showFilter && (
+        <div className="fixed top-24 left-4 z-50">
+          <button
+            onClick={() => setShowFilter(true)}
+            className="flex items-center gap-1 bg-indigo-600 text-white px-3 py-2 text-sm rounded shadow hover:bg-indigo-700"
+          >
+            <FaFilter size={14} /> Filter
+          </button>
+        </div>
+      )}
+
+      {/* PAGE HEADER */}
       <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => setShowFilter(true)}
-          className="flex items-center gap-1 bg-indigo-600 text-white px-3 py-1 text-sm rounded shadow hover:bg-indigo-700 lg:hidden"
-        >
-          <FaFilter size={14} /> Filter
-        </button>
         <h2 className="text-2xl font-bold">🛒 Grocery Items</h2>
       </div>
 
@@ -115,13 +120,19 @@ const GroceryPage = () => {
         </div>
       ) : (
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Sidebar Filter */}
+          {/* DESKTOP SIDEBAR */}
           <div className="w-full lg:w-64 sticky top-24 hidden lg:block h-fit bg-white p-4 rounded shadow">
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
 
-          {/* Products Grid */}
-          <div className="flex-1 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* PRODUCTS GRID */}
+          <div
+            className={`flex-1 grid gap-4 ${
+              isSmall
+                ? "grid-cols-2"
+                : "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
+            }`}
+          >
             {filtered.length === 0 ? (
               <p className="text-center text-gray-500 col-span-full mt-20 text-lg">
                 No Grocery products found.
@@ -132,7 +143,6 @@ const GroceryPage = () => {
                   key={product._id}
                   className="bg-white rounded-lg shadow hover:shadow-lg transition duration-300 relative flex flex-col"
                 >
-                  {/* IMAGE */}
                   <Link to={`/buy/${product._id}`}>
                     <img
                       src={product.image}
@@ -167,7 +177,6 @@ const GroceryPage = () => {
                         </span>
                       </div>
 
-                      {/* DESCRIPTION */}
                       <ul className="text-sm text-gray-500 mb-3 list-disc ml-5">
                         {isSmall ? (
                           <li>
@@ -186,7 +195,6 @@ const GroceryPage = () => {
                         )}
                       </ul>
 
-                      {/* MORE DETAILS BUTTON */}
                       {isSmall && (
                         <button
                           onClick={() => navigate(`/buy/${product._id}`)}
@@ -209,7 +217,6 @@ const GroceryPage = () => {
                     </div>
                   </div>
 
-                  {/* ADD TO CART BUTTON */}
                   <button
                     onClick={() => handleAddToCart(product._id)}
                     title="Add to Cart"
@@ -224,10 +231,10 @@ const GroceryPage = () => {
         </div>
       )}
 
-      {/* Mobile Filter Drawer */}
+      {/* MOBILE FILTER DRAWER */}
       {showFilter && (
         <div className="fixed inset-0 z-50 flex">
-          <div className="w-72 bg-white shadow-lg p-4 overflow-y-auto">
+          <div className="w-72 bg-white shadow-lg p-4 overflow-y-auto animate-slideIn">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Filters</h2>
               <button

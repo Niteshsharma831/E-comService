@@ -14,19 +14,18 @@ const HomeAndTv = () => {
 
   const navigate = useNavigate();
 
-  // Add to Cart
+  // ➤ ADD TO CART
   const handleAddToCart = async (productId) => {
     try {
       await API.post("/users/cart/add", { productId, quantity: 1 });
       toast.success("✅ Added to cart");
     } catch (err) {
-      if (err.response?.status === 401)
-        toast.warning("⚠️ Please login to add items");
+      if (err.response?.status === 401) toast.warning("⚠️ Please login");
       else toast.error("❌ Failed to add to cart");
     }
   };
 
-  // Filter Config
+  // ➤ FILTER CONFIG
   const config = {
     price: { min: 0, max: 100000 },
     subcategories: {
@@ -39,7 +38,7 @@ const HomeAndTv = () => {
     ratings: [4, 3],
   };
 
-  // Apply Filters
+  // ➤ APPLY FILTERS
   const applyFilters = ({ sub, maxPrice, ratings }) => {
     let temp = [...products];
     Object.entries(sub).forEach(([category, arr]) => {
@@ -52,9 +51,10 @@ const HomeAndTv = () => {
     if (ratings.length)
       temp = temp.filter((p) => ratings.some((r) => p.rating >= r));
     setFiltered(temp);
+    setShowFilter(false); // close drawer after apply
   };
 
-  // Fetch Products
+  // ➤ FETCH PRODUCTS
   useEffect(() => {
     const loadProducts = async () => {
       try {
@@ -86,7 +86,6 @@ const HomeAndTv = () => {
 
     loadProducts();
 
-    // Detect small screen
     const handleResize = () => setIsSmall(window.innerWidth < 768);
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -94,19 +93,25 @@ const HomeAndTv = () => {
   }, []);
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 bg-gray-50 pt-20 mt-10">
-      {/* Top Bar */}
+    <div className="min-h-screen p-4 sm:p-6 bg-gray-50 pt-20">
+      {/* MOBILE FILTER BUTTON */}
+      {isSmall && !showFilter && (
+        <div className="fixed top-24 left-4 z-50">
+          <button
+            onClick={() => setShowFilter(true)}
+            className="flex items-center gap-1 bg-indigo-600 text-white px-3 py-2 text-sm rounded shadow hover:bg-indigo-700"
+          >
+            <FaFilter size={14} /> Filter
+          </button>
+        </div>
+      )}
+
+      {/* PAGE HEADER */}
       <div className="flex justify-between items-center mb-4">
-        <button
-          onClick={() => setShowFilter(true)}
-          className="flex items-center gap-1 bg-indigo-600 text-white px-3 py-1 text-sm rounded shadow lg:hidden"
-        >
-          <FaFilter size={14} /> Filter
-        </button>
         <h2 className="text-xl sm:text-2xl font-bold">TV & Appliances</h2>
       </div>
 
-      {/* Loading */}
+      {/* LOADING */}
       {loading ? (
         <div className="flex items-center justify-center min-h-[400px]">
           <img
@@ -116,25 +121,30 @@ const HomeAndTv = () => {
           />
         </div>
       ) : (
-        <div className="flex h-[calc(100vh-150px)] overflow-hidden">
-          {/* Desktop Filter */}
-          <div className="w-64 hidden lg:block sticky top-24 h-full overflow-y-auto p-4 bg-white shadow">
+        <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-150px)] overflow-hidden">
+          {/* DESKTOP SIDEBAR */}
+          <div className="w-full lg:w-64 sticky top-24 hidden lg:block h-full overflow-y-auto p-4 bg-white shadow rounded">
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
 
-          {/* Product Grid */}
-          <div className="flex-1 overflow-y-auto p-2 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* PRODUCT GRID */}
+          <div
+            className={`flex-1 overflow-y-auto grid gap-4 ${
+              isSmall
+                ? "grid-cols-2"
+                : "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
+            }`}
+          >
             {filtered.length === 0 ? (
-              <div className="flex items-center justify-center min-h-[300px] col-span-full">
-                <p className="text-gray-500 text-lg">No products found</p>
-              </div>
+              <p className="text-center text-gray-500 col-span-full mt-20 text-lg">
+                No products found.
+              </p>
             ) : (
               filtered.map((product) => (
                 <div
                   key={product._id}
-                  className="bg-white rounded-lg shadow hover:shadow-md transition relative flex flex-col"
+                  className="bg-white rounded-lg shadow hover:shadow-lg transition relative flex flex-col"
                 >
-                  {/* IMAGE */}
                   <Link to={`/buy/${product._id}`}>
                     <img
                       src={product.image}
@@ -149,6 +159,24 @@ const HomeAndTv = () => {
                       <p className="text-sm text-gray-600 capitalize">
                         {product.category}
                       </p>
+
+                      {/* Rating */}
+                      <div className="flex items-center mb-2">
+                        {[...Array(5)].map((_, i) => (
+                          <FaStar
+                            key={i}
+                            size={12}
+                            className={`mr-1 ${
+                              i < product.rating
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                        <span className="text-xs text-gray-500 ml-1">
+                          ({product.rating})
+                        </span>
+                      </div>
 
                       {/* Description */}
                       <ul className="text-sm text-gray-500 mb-2 list-disc ml-5">
@@ -169,7 +197,6 @@ const HomeAndTv = () => {
                         )}
                       </ul>
 
-                      {/* More Details */}
                       {isSmall && (
                         <button
                           onClick={() => navigate(`/buy/${product._id}`)}
@@ -180,6 +207,7 @@ const HomeAndTv = () => {
                       )}
                     </div>
 
+                    {/* Price & Discount */}
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-lg text-green-700 font-bold">
                         ₹{product.price}
@@ -206,10 +234,10 @@ const HomeAndTv = () => {
         </div>
       )}
 
-      {/* Mobile Filter */}
+      {/* MOBILE FILTER DRAWER */}
       {showFilter && (
         <div className="fixed inset-0 z-50 flex">
-          <div className="w-72 bg-white shadow-lg p-4">
+          <div className="w-72 bg-white shadow-lg p-4 overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Filters</h2>
               <button
@@ -219,7 +247,6 @@ const HomeAndTv = () => {
                 <FaTimes size={20} />
               </button>
             </div>
-
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
           <div
