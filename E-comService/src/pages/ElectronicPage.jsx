@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaCartPlus } from "react-icons/fa";
 import FilterPage from "../components/FilterPage";
 import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ElectronicPage = () => {
   const [products, setProducts] = useState([]);
@@ -89,20 +90,38 @@ const ElectronicPage = () => {
       ) : (
         <div className="flex h-[calc(100vh-80px)] overflow-hidden">
           {/* LEFT FILTER SIDEBAR */}
-          <div className="w-64 hidden lg:block sticky top-20 h-full overflow-y-auto p-4 bg-white shadow">
-            <FilterPage categoriesConfig={config} onApply={applyFilters} />
-          </div>
+          {!isSmall && (
+            <div className="w-64 hidden lg:block sticky top-20 h-full overflow-y-auto p-4 bg-white shadow">
+              <FilterPage categoriesConfig={config} onApply={applyFilters} />
+            </div>
+          )}
 
           {/* PRODUCT LISTING */}
-          <div className="flex-1 overflow-y-auto p-4">
-            <h2 className="text-2xl font-bold mb-4">Electronic Products</h2>
+          <div className={`flex-1 overflow-y-auto ${isSmall ? "p-0" : "p-4"}`}>
+            <h2
+              className={`text-2xl font-bold mb-4 ${
+                isSmall ? "px-2 sm:px-0" : ""
+              }`}
+            >
+              Electronic Products
+            </h2>
 
             {filtered.length === 0 ? (
-              <div className="text-gray-500 text-lg font-medium">
+              <div
+                className={`text-gray-500 text-lg font-medium ${
+                  isSmall ? "px-2" : ""
+                }`}
+              >
                 No electronic products found.
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div
+                className={`grid gap-6 ${
+                  isSmall
+                    ? "grid-cols-1"
+                    : "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
+                }`}
+              >
                 {filtered.map((product) => (
                   <div
                     key={product._id}
@@ -113,7 +132,9 @@ const ElectronicPage = () => {
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="h-48 w-full object-contain p-4"
+                        className={`${
+                          isSmall ? "w-full h-56" : "h-48 w-full"
+                        } object-contain p-4`}
                       />
                     </Link>
 
