@@ -1,8 +1,6 @@
 const dotenv = require("dotenv");
 
-// -----------------------------------------
 // Load environment variables based on NODE_ENV
-// -----------------------------------------
 if (process.env.NODE_ENV === "production") {
   dotenv.config({ path: ".env.production" });
 } else {
@@ -16,15 +14,12 @@ const port = process.env.PORT || 3000;
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
-// -----------------------------------------
 // Database Connection
-// -----------------------------------------
 const connectDB = require("./config/db");
 connectDB();
 
-// -----------------------------------------
 // CORS Setup for Localhost + Live Frontend
-// -----------------------------------------
+
 const allowedOrigins = [
   "http://localhost:3000", // React Local
   "http://localhost:5173", // Vite Local
@@ -44,16 +39,12 @@ app.use(
   })
 );
 
-// -----------------------------------------
 // Middleware
-// -----------------------------------------
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// -----------------------------------------
 // Routes
-// -----------------------------------------
 const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -64,16 +55,12 @@ app.use("/api/products", productRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/payment", paymentRoutes);
 
-// -----------------------------------------
 // Health Check
-// -----------------------------------------
 app.get("/", (req, res) => {
   res.send("✅ Welcome to E-commerce Backend");
 });
 
-// -----------------------------------------
 // Start Server
-// -----------------------------------------
 app.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);
 });
