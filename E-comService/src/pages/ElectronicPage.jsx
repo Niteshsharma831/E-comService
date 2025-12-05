@@ -13,6 +13,7 @@ const ElectronicPage = () => {
   const [isSmall, setIsSmall] = useState(false);
   const navigate = useNavigate();
 
+  // ---------------- Add to Cart --------------------
   const handleAddToCart = async (productId) => {
     try {
       await API.post("/users/cart/add", { productId, quantity: 1 });
@@ -23,6 +24,7 @@ const ElectronicPage = () => {
     }
   };
 
+  // ---------------- Filter Config --------------------
   const config = {
     price: { min: 0, max: 150000 },
     subcategories: {
@@ -34,6 +36,7 @@ const ElectronicPage = () => {
     ratings: [4, 3],
   };
 
+  // ---------------- Apply Filters --------------------
   const applyFilters = ({ sub, maxPrice, ratings }) => {
     let temp = [...products];
     Object.entries(sub).forEach(([cat, arr]) => {
@@ -48,6 +51,7 @@ const ElectronicPage = () => {
     setFiltered(temp);
   };
 
+  // ---------------- Fetch Products --------------------
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -82,7 +86,7 @@ const ElectronicPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 mt-10">
+    <div className="min-h-screen bg-gray-50 pt-0 sm:pt-20">
       {loading ? (
         <div className="flex justify-center items-center min-h-[400px]">
           <img src="/loader.gif" alt="Loading..." className="w-40 h-40" />
@@ -90,37 +94,27 @@ const ElectronicPage = () => {
       ) : (
         <div className="flex h-[calc(100vh-80px)] overflow-hidden">
           {/* LEFT FILTER SIDEBAR */}
-          {!isSmall && (
-            <div className="w-64 hidden lg:block sticky top-20 h-full overflow-y-auto p-4 bg-white shadow">
-              <FilterPage categoriesConfig={config} onApply={applyFilters} />
-            </div>
-          )}
+          <div className="w-64 hidden lg:block sticky top-20 h-full overflow-y-auto p-4 bg-white shadow">
+            <FilterPage categoriesConfig={config} onApply={applyFilters} />
+          </div>
 
           {/* PRODUCT LISTING */}
-          <div className={`flex-1 overflow-y-auto ${isSmall ? "p-0" : "p-4"}`}>
-            <h2
-              className={`text-2xl font-bold mb-4 ${
-                isSmall ? "px-2 sm:px-0" : ""
-              }`}
-            >
+          <div className="flex-1 overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-4 px-2 sm:px-4">
               Electronic Products
             </h2>
 
             {filtered.length === 0 ? (
-              <div
-                className={`text-gray-500 text-lg font-medium ${
-                  isSmall ? "px-2" : ""
-                }`}
-              >
+              <div className="text-gray-500 text-lg font-medium px-2 sm:px-4">
                 No electronic products found.
               </div>
             ) : (
               <div
-                className={`grid gap-6 ${
+                className={`grid gap-4 sm:gap-6 ${
                   isSmall
-                    ? "grid-cols-1"
+                    ? "grid-cols-2"
                     : "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
-                }`}
+                } px-0 sm:px-4`}
               >
                 {filtered.map((product) => (
                   <div
@@ -132,14 +126,12 @@ const ElectronicPage = () => {
                       <img
                         src={product.image}
                         alt={product.name}
-                        className={`${
-                          isSmall ? "w-full h-56" : "h-48 w-full"
-                        } object-contain p-4`}
+                        className="h-48 w-full object-contain p-2 sm:p-4"
                       />
                     </Link>
 
-                    <div className="px-4 pb-4">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                    <div className="px-3 sm:px-4 py-2">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-1 line-clamp-1">
                         {product.name}
                       </h3>
 
@@ -148,7 +140,7 @@ const ElectronicPage = () => {
                       </p>
 
                       {/* DESCRIPTION */}
-                      <ul className="text-sm text-gray-500 mb-3 list-disc ml-5">
+                      <ul className="text-sm text-gray-500 mb-2 list-disc ml-5">
                         {isSmall ? (
                           <li>
                             {Array.isArray(product.description)
@@ -176,7 +168,7 @@ const ElectronicPage = () => {
                         </button>
                       )}
 
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center mt-2">
                         <span className="text-lg font-bold text-green-700">
                           ₹{product.price}
                         </span>
