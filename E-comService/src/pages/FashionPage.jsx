@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaCartPlus, FaFilter, FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import FilterPage from "../components/FilterPage";
+import "react-toastify/dist/ReactToastify.css";
 
 const FashionPage = () => {
   const [products, setProducts] = useState([]);
@@ -13,7 +14,6 @@ const FashionPage = () => {
   const [isSmall, setIsSmall] = useState(false);
   const navigate = useNavigate();
 
-  // ➤ ADD TO CART
   const handleAddToCart = async (productId) => {
     try {
       await API.post("/users/cart/add", { productId, quantity: 1 });
@@ -25,7 +25,6 @@ const FashionPage = () => {
     }
   };
 
-  // ➤ FILTER CONFIG
   const config = {
     price: { min: 0, max: 5000 },
     subcategories: {
@@ -71,7 +70,6 @@ const FashionPage = () => {
     ratings: [4, 3],
   };
 
-  // ➤ APPLY FILTERS
   const applyFilters = ({ sub, maxPrice, ratings }) => {
     let temp = [...products];
     Object.entries(sub).forEach(([cat, arr]) => {
@@ -87,7 +85,6 @@ const FashionPage = () => {
     setFiltered(temp);
   };
 
-  // ➤ FETCH PRODUCTS
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -100,12 +97,9 @@ const FashionPage = () => {
           return (
             category.includes("fashion") ||
             category.includes("clothing") ||
-            name.includes("shirt") ||
-            name.includes("jeans") ||
-            name.includes("tshirt") ||
-            name.includes("kurti") ||
-            name.includes("dress") ||
-            name.includes("hoodie")
+            ["shirt", "jeans", "tshirt", "kurti", "dress", "hoodie"].some(
+              (keyword) => name.includes(keyword)
+            )
           );
         });
 
@@ -120,7 +114,6 @@ const FashionPage = () => {
 
     fetchProducts();
 
-    // Detect small screen
     const handleResize = () => setIsSmall(window.innerWidth < 768);
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -128,63 +121,74 @@ const FashionPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24 px-4">
+    <div className="min-h-screen bg-gray-50 pt-24">
       {/* MOBILE FILTER BUTTON */}
-      <div className="fixed top-22 left-4 z-50 lg:hidden">
-        <button
-          onClick={() => setShowFilter(true)}
-          className="flex items-center gap-1 bg-[#6B46FF] text-white px-3 py-2 text-sm rounded shadow-md hover:bg-[#5a3ee6]"
-        >
-          <FaFilter size={14} />
-          Filter
-        </button>
-      </div>
+      {isSmall && !showFilter && (
+        <div className="fixed top-24 left-4 z-50">
+          <button
+            onClick={() => setShowFilter(true)}
+            className="flex items-center gap-1 bg-indigo-600 text-white px-3 py-2 text-sm rounded shadow-md hover:bg-indigo-700"
+          >
+            <FaFilter size={14} /> Filter
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center items-center min-h-[400px]">
           <img src="/loader.gif" alt="Loading..." className="w-40 h-40" />
         </div>
       ) : (
-        <div className="flex h-[calc(100vh-150px)] overflow-hidden">
-          {/* DESKTOP SIDEBAR */}
-          <div className="w-64 hidden lg:block sticky top-20 h-full overflow-y-auto p-4 bg-white shadow">
+        <div className="flex h-[calc(100vh-96px)] overflow-hidden">
+          {/* DESKTOP FILTER */}
+          <div className="w-64 hidden lg:block sticky top-24 h-full overflow-y-auto p-4 bg-white shadow">
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
 
-          {/* PRODUCT LISTING */}
-          <div className="flex-1 overflow-y-auto p-4">
-            <h2 className="text-2xl font-bold mb-4">Fashion Collection</h2>
+          {/* PRODUCT GRID */}
+          <div
+            className={`flex-1 overflow-y-auto ${
+              isSmall ? "px-0 mt-0" : "px-4 sm:px-6"
+            }`}
+          >
+            <h2 className="text-2xl font-bold mb-4 px-2 sm:px-4">
+              Fashion Collection
+            </h2>
 
             {filtered.length === 0 ? (
-              <div className="text-gray-500 text-lg font-medium">
+              <div className="text-gray-500 text-lg font-medium px-2 sm:px-4">
                 No products found.
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div
+                className={`grid gap-4 sm:gap-6 ${
+                  isSmall
+                    ? "grid-cols-2 px-2 mt-2"
+                    : "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 px-4"
+                }`}
+              >
                 {filtered.map((product) => (
                   <div
                     key={product._id}
                     className="bg-white rounded-lg shadow hover:shadow-md transition relative"
                   >
-                    {/* IMAGE LINK */}
                     <Link to={`/buy/${product._id}`}>
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="h-48 w-full object-contain p-4"
+                        className="h-48 w-full object-contain p-2 sm:p-4"
                       />
                     </Link>
 
-                    <div className="px-4 pb-4">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                    <div className="px-3 sm:px-4 py-2">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-1 line-clamp-1">
                         {product.name}
                       </h3>
                       <p className="text-sm text-gray-600 mb-2 capitalize">
                         {product.category}
                       </p>
 
-                      {/* DESCRIPTION */}
-                      <ul className="text-sm text-gray-500 mb-3 list-disc ml-5">
+                      <ul className="text-sm text-gray-500 mb-2 list-disc ml-5">
                         {isSmall ? (
                           <li>
                             {Array.isArray(product.description)
@@ -202,7 +206,6 @@ const FashionPage = () => {
                         )}
                       </ul>
 
-                      {/* MORE DETAILS BUTTON */}
                       {isSmall && (
                         <button
                           onClick={() => navigate(`/buy/${product._id}`)}
@@ -212,7 +215,7 @@ const FashionPage = () => {
                         </button>
                       )}
 
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center mt-2">
                         <span className="text-lg font-bold text-green-700">
                           ₹{product.price}
                         </span>
