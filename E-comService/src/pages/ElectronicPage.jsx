@@ -83,20 +83,20 @@ const ElectronicPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-gray-50 pt-24">
       {loading ? (
         <div className="flex justify-center items-center min-h-[400px]">
           <img src="/loader.gif" alt="Loading..." className="w-40 h-40" />
         </div>
       ) : (
-        <div className="flex h-[calc(100vh-80px)] overflow-hidden relative">
+        <div className="flex h-[calc(100vh-96px)] overflow-hidden relative">
           {/* Desktop Filter */}
-          <div className="w-64 hidden lg:block sticky top-20 h-full overflow-y-auto p-4 bg-white shadow">
+          <div className="w-64 hidden lg:block sticky top-24 h-full overflow-y-auto p-4 bg-white shadow">
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
 
           {/* Mobile Filter Button */}
-          {isSmall && (
+          {isSmall && !showFilter && (
             <button
               className="fixed top-24 left-2 z-50 flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-md shadow-md"
               onClick={() => setShowFilter(true)}
@@ -128,7 +128,11 @@ const ElectronicPage = () => {
           )}
 
           {/* Product Grid */}
-          <div className="flex-1 overflow-y-auto">
+          <div
+            className={`flex-1 overflow-y-auto ${
+              isSmall ? "px-0 mt-0" : "px-4 sm:px-6"
+            }`}
+          >
             <h2 className="text-2xl font-bold mb-4 px-2 sm:px-4">
               Electronic Products
             </h2>
@@ -140,7 +144,9 @@ const ElectronicPage = () => {
             ) : (
               <div
                 className={`grid gap-4 sm:gap-6 ${
-                  isSmall ? "grid-cols-2 px-2" : "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 px-4"
+                  isSmall
+                    ? "grid-cols-2 px-2 mt-2"
+                    : "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 px-4"
                 }`}
               >
                 {filtered.map((product) => (
