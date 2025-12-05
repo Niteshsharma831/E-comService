@@ -2,6 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import API from "../api";
+import {
+  FaStar,
+  FaTags,
+  FaBoxOpen,
+  FaShoppingCart,
+  FaBolt,
+} from "react-icons/fa";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -14,10 +21,7 @@ const ProductDetailPage = () => {
         const res = await API.get(`/products/getproducts/${id}`);
         setProduct(res.data.product);
       } catch (err) {
-        console.error(
-          "Error loading product:",
-          err.response?.data || err.message
-        );
+        console.error("Error loading product:", err);
         toast.error("❌ Failed to load product details.");
       }
     };
@@ -26,26 +30,22 @@ const ProductDetailPage = () => {
 
   const handleBuyNow = () => {
     if (!product) return;
-    // Pass product as orderPayload for Razorpay page
     const orderPayload = { productId: product._id, price: product.price };
     navigate("/order", { state: { product, orderPayload } });
   };
 
   const handleAddToCart = async () => {
     if (!product) return;
+
     try {
       await API.post("/users/cart/add", {
         productId: product._id,
         quantity: 1,
       });
-      toast.success("✅ Added to cart successfully!");
+      toast.success("🛒 Added to cart successfully!");
     } catch (err) {
-      console.error(
-        "Failed to add to cart:",
-        err.response?.data || err.message
-      );
       if (err.response?.status === 401) {
-        toast.warning("⚠️ Please login to add items.");
+        toast.warning("⚠️ Please login to continue.");
         navigate("/login");
       } else {
         toast.error("❌ Failed to add to cart.");
@@ -57,146 +57,169 @@ const ProductDetailPage = () => {
     return <div className="text-center mt-20 text-gray-500">Loading...</div>;
 
   return (
-    <div className="mt-24 min-h-screen bg-gray-100 px-6 py-8">
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6 flex flex-col lg:flex-row gap-8">
-        {/* Left - Image and Buttons */}
-        <div className="w-full lg:w-1/2 flex flex-col items-center">
-          <img
-            src={product.image || "/placeholder.png"}
-            alt={product.name}
-            className="h-[400px] w-full object-contain"
-          />
-          <div className="flex gap-4 mt-6 w-full justify-center px-2">
-            <button
-              onClick={handleAddToCart}
-              className="bg-yellow-400 text-black font-semibold px-6 py-3 rounded hover:bg-yellow-500 w-1/2"
-            >
-              🛒 Add to Cart
-            </button>
-            <button
-              onClick={handleBuyNow}
-              className="bg-orange-600 text-white font-semibold px-6 py-3 rounded hover:bg-orange-700 w-1/2"
-            >
-              ⚡ Buy Now
-            </button>
-          </div>
-        </div>
+    <div className="mt-30 min-h-screen bg-gray-100 px-3 md:px-6 py-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col lg:flex-row gap-10">
+          {/* LEFT IMAGE SECTION */}
+          <div className="w-full lg:w-1/2 flex flex-col items-center">
+            <div className="bg-white rounded-2xl shadow-lg p-4 h-[400px] w-full flex items-center justify-center overflow-hidden">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="object-contain h-full w-full hover:scale-105 transition-transform duration-300"
+              />
+            </div>
 
-        {/* Right - Product Details */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">{product.name}</h1>
-            <p className="text-gray-600 mt-1 mb-2 capitalize">
+            {/* THUMBNAILS */}
+            <div className="flex gap-3 mt-4">
+              {[product.image, product.image, product.image].map(
+                (img, index) => (
+                  <img
+                    key={index}
+                    src={img}
+                    className="h-16 w-16 rounded-xl p-1 bg-white shadow-md object-contain"
+                  />
+                )
+              )}
+            </div>
+
+            {/* DESKTOP BUTTONS BELOW IMAGE */}
+            <div className="hidden lg:flex mt-6 gap-4 w-full">
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 bg-yellow-400 rounded-xl py-3 font-semibold flex items-center justify-center gap-2"
+              >
+                <FaShoppingCart /> Add to Cart
+              </button>
+
+              <button
+                onClick={handleBuyNow}
+                className="flex-1 bg-orange-600 text-white rounded-xl py-3 font-semibold flex items-center justify-center gap-2"
+              >
+                <FaBolt /> Buy Now
+              </button>
+            </div>
+          </div>
+
+          {/* RIGHT SIDE DETAILS */}
+          <div className="w-full lg:w-1/2 flex flex-col">
+            <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
+
+            <p className="text-gray-600 mt-2 capitalize text-sm">
               {product.category}
             </p>
 
             {/* Ratings */}
-            <div className="flex items-center gap-2 mb-4">
-              <span className="bg-green-600 text-white text-xs px-2 py-1 rounded">
-                4.3 ★
+            <div className="flex items-center gap-2 mt-3">
+              <span className="bg-green-600 text-white px-2 py-1 text-xs rounded-lg flex items-center gap-1">
+                <FaStar /> 4.3
               </span>
-              <span className="text-sm text-gray-500">8,475 Ratings</span>
+              <span className="text-gray-500 text-sm">8,475 Ratings</span>
             </div>
 
-            {/* Pricing */}
-            <div className="flex items-center gap-3 mb-3">
-              <span className="text-2xl font-bold text-green-700">
+            {/* Price */}
+            <div className="mt-4 flex items-center gap-4">
+              <p className="text-4xl font-bold text-green-700">
                 ₹{product.price}
-              </span>
-              <span className="line-through text-gray-400 text-sm">
-                ₹{Math.round(product.price * 1.14)}
-              </span>
+              </p>
+              <p className="text-gray-400 line-through text-sm">
+                ₹{Math.round(product.price * 1.2)}
+              </p>
               {product.discount && (
-                <span className="text-green-600 text-sm font-medium">
-                  {product.discount}% off
-                </span>
+                <p className="text-green-600 text-sm font-medium">
+                  {product.discount}% Off
+                </p>
               )}
             </div>
 
+            {/* Offers */}
+            <div className="mt-6 bg-blue-50 p-5 rounded-2xl shadow">
+              <h3 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <FaTags /> Available Offers
+              </h3>
+              <ul className="text-sm text-gray-700 space-y-1 ml-4">
+                <li>🔥 5% cashback on Flipkart Axis Bank Credit Card</li>
+                <li>🔥 Flat ₹750 off on Axis Bank Debit Card</li>
+                <li>🔥 ₹10 Cashback on Paytm UPI</li>
+              </ul>
+            </div>
+
             {/* Description */}
-            <div className="mb-5">
-              <h3 className="font-semibold text-gray-700 mb-1">Description:</h3>
-              <ul className="list-disc text-gray-600 text-sm ml-5">
+            <div className="mt-6">
+              <h3 className="font-semibold text-gray-800 text-lg mb-2">
+                Description
+              </h3>
+              <ul className="list-disc ml-6 text-gray-600 text-sm space-y-1">
                 {(Array.isArray(product.description)
                   ? product.description
-                  : product.description
-                  ? [product.description]
-                  : []
-                ).map((item, index) => (
-                  <li key={index}>{item}</li>
+                  : [product.description]
+                ).map((item, i) => (
+                  <li key={i}>{item}</li>
                 ))}
               </ul>
             </div>
 
-            {/* Offers */}
-            <div className="mb-5">
-              <h3 className="text-md font-semibold text-gray-700 mb-2">
-                Available offers
+            {/* Specifications */}
+            <div className="mt-8 bg-gray-50 p-5 rounded-2xl shadow-inner">
+              <h3 className="font-semibold text-gray-800 text-lg mb-3">
+                Product Details
               </h3>
-              <ul className="text-sm text-gray-600 space-y-1 list-disc ml-6">
-                <li>
-                  Bank Offer: 5% cashback on Flipkart Axis Bank Credit Card
-                </li>
-                <li>Bank Offer: 5% off on Axis Bank Debit Card up to ₹750</li>
-                <li>Flat ₹10 Cashback on Paytm UPI (Min ₹500)</li>
-              </ul>
+              <div className="grid grid-cols-2 gap-3 text-gray-600 text-sm">
+                <p>
+                  <strong>Brand:</strong> {product.brand}
+                </p>
+                <p>
+                  <strong>Stock:</strong> {product.stock}
+                </p>
+                <p>
+                  <strong>SKU:</strong> {product.sku}
+                </p>
+                <p>
+                  <strong>Warranty:</strong> {product.warranty || "1 Year"}
+                </p>
+                <p>
+                  <strong>Color:</strong> {product.color || "Multiple"}
+                </p>
+                <p>
+                  <strong>Weight:</strong> {product.weight || "400g"}
+                </p>
+                <p>
+                  <strong>Material:</strong>{" "}
+                  {product.material || "Plastic / Metal"}
+                </p>
+                <p>
+                  <strong>Dimensions:</strong>{" "}
+                  {product.dimensions || "Standard"}
+                </p>
+              </div>
             </div>
 
-            {/* Exchange Options */}
-            <div className="mb-5 border rounded-lg p-4">
-              <label className="flex items-center gap-4 text-sm">
-                <input
-                  type="radio"
-                  name="exchange"
-                  defaultChecked
-                  className="accent-blue-600"
-                />
-                Buy without Exchange - ₹{product.price}
-              </label>
-              <label className="flex items-center gap-4 text-sm mt-2 text-gray-500">
-                <input
-                  type="radio"
-                  name="exchange"
-                  className="accent-blue-600"
-                />
-                Buy with Exchange - up to ₹6,350 off
-              </label>
-              <p className="text-xs text-red-500 mt-1">
-                Enter pincode to check if exchange is available
-              </p>
-            </div>
-
-            {/* Product Additional Details */}
-            <div className="text-sm text-gray-600 space-y-1">
-              <p>
-                <strong>Brand:</strong> {product.brand}
-              </p>
-              <p>
-                <strong>Stock:</strong> {product.stock}
-              </p>
-              <p>
-                <strong>SKU:</strong> {product.sku}
-              </p>
-              <p>
-                <strong>Warranty:</strong>{" "}
-                {product.warranty || "1 Year Manufacturer Warranty"}
-              </p>
-              <p>
-                <strong>Color:</strong> {product.color || "Varies by model"}
-              </p>
-              <p>
-                <strong>Material:</strong>{" "}
-                {product.material || "Plastic / Metal"}
-              </p>
-              <p>
-                <strong>Dimensions:</strong> {product.dimensions || "Standard"}
-              </p>
-              <p>
-                <strong>Weight:</strong> {product.weight || "Approx. 400g"}
+            {/* Delivery */}
+            <div className="mt-6 flex items-center gap-3 p-4 bg-white rounded-2xl shadow">
+              <FaBoxOpen className="text-indigo-600 text-2xl" />
+              <p className="text-gray-600 text-sm">
+                Delivery in <strong>3–5 days</strong> • Free shipping over ₹499
               </p>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* MOBILE ONLY BUTTONS */}
+      <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white p-3 shadow-2xl flex gap-3">
+        <button
+          onClick={handleAddToCart}
+          className="flex-1 bg-yellow-400 rounded-xl py-3 font-semibold flex items-center justify-center gap-2"
+        >
+          <FaShoppingCart /> Add to Cart
+        </button>
+
+        <button
+          onClick={handleBuyNow}
+          className="flex-1 bg-orange-600 text-white rounded-xl py-3 font-semibold flex items-center justify-center gap-2"
+        >
+          <FaBolt /> Buy Now
+        </button>
       </div>
     </div>
   );

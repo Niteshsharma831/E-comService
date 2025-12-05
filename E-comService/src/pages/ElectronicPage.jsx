@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import API from "../api"; // ⬅ use axios instance
-import { Link } from "react-router-dom";
+import API from "../api";
+import { Link, useNavigate } from "react-router-dom";
 import { FaCartPlus } from "react-icons/fa";
 import FilterPage from "../components/FilterPage";
 import { toast, ToastContainer } from "react-toastify";
@@ -9,151 +9,77 @@ const ElectronicPage = () => {
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSmall, setIsSmall] = useState(false);
+  const navigate = useNavigate();
 
-  // ----------------------------
-  // ADD TO CART
-  // ----------------------------
   const handleAddToCart = async (productId) => {
     try {
-      await API.post("/users/cart/add", {
-        productId,
-        quantity: 1,
-      });
-
+      await API.post("/users/cart/add", { productId, quantity: 1 });
       toast.success("✅ Added to cart");
     } catch (err) {
-      if (err.response?.status === 401) {
-        toast.warning("⚠️ Please login to add items");
-      } else {
-        toast.error("❌ Failed to add to cart");
-      }
+      if (err.response?.status === 401) toast.warning("⚠️ Please login");
+      else toast.error("❌ Failed to add to cart");
     }
   };
 
-  // ----------------------------
-  // FILTER CONFIG
-  // ----------------------------
   const config = {
     price: { min: 0, max: 150000 },
     subcategories: {
-      smartphone: [
-        "samsung",
-        "apple",
-        "redmi",
-        "realme",
-        "vivo",
-        "oppo",
-        "motorola",
-        "oneplus",
-        "iqoo",
-        "infinix",
-        "nothing",
-      ],
-      laptop: [
-        "gaming",
-        "business",
-        "student",
-        "macbook",
-        "lenovo",
-        "hp",
-        "dell",
-        "acer",
-        "msi",
-        "asus",
-        "chromebook",
-      ],
-      headsets: [
-        "wired",
-        "wireless",
-        "bluetooth",
-        "over-ear",
-        "in-ear",
-        "neckband",
-        "noise-cancelling",
-        "gaming",
-        "true wireless",
-        "headphones",
-        "earbuds",
-      ],
-      accessories: [
-        "charger",
-        "cable",
-        "adapter",
-        "powerbank",
-        "screen guard",
-        "phone case",
-        "mouse",
-        "keyboard",
-        "usb hub",
-        "stylus",
-        "webcam",
-      ],
+      smartphone: ["samsung", "apple", "redmi", "realme", "vivo", "oppo"],
+      laptop: ["gaming", "business", "macbook", "lenovo", "hp", "dell"],
+      headsets: ["wired", "wireless", "bluetooth", "over-ear", "in-ear"],
+      accessories: ["charger", "cable", "adapter", "powerbank", "mouse"],
     },
     ratings: [4, 3],
   };
 
-  // ----------------------------
-  // APPLY FILTERS
-  // ----------------------------
   const applyFilters = ({ sub, maxPrice, ratings }) => {
     let temp = [...products];
-
     Object.entries(sub).forEach(([cat, arr]) => {
-      if (arr.length > 0) {
+      if (arr.length > 0)
         temp = temp.filter((p) =>
           p.tags?.some((tag) => arr.includes(tag.toLowerCase()))
         );
-      }
     });
-
     temp = temp.filter((p) => p.price <= maxPrice);
-
-    if (ratings.length > 0) {
+    if (ratings.length > 0)
       temp = temp.filter((p) => ratings.some((r) => p.rating >= r));
-    }
-
     setFiltered(temp);
   };
 
-  // ----------------------------
-  // FETCH ELECTRONICS
-  // ----------------------------
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await API.get("/products/getallproducts");
-
         const all = res.data.products || [];
-
         const electronicItems = all.filter((product) => {
-          const category = product.category?.toLowerCase() || "";
+          const cat = product.category?.toLowerCase() || "";
           return (
-            category.includes("electronic") ||
-            category.includes("smartphone") ||
-            category.includes("laptop") ||
-            category.includes("headset") ||
-            category.includes("tv") ||
-            category.includes("appliance")
+            cat.includes("electronic") ||
+            cat.includes("smartphone") ||
+            cat.includes("laptop") ||
+            cat.includes("headset") ||
+            cat.includes("tv") ||
+            cat.includes("appliance")
           );
         });
-
         setProducts(electronicItems);
         setFiltered(electronicItems);
-
         setTimeout(() => setLoading(false), 1000);
       } catch (err) {
-        console.error("Error fetching electronic products:", err.message);
+        console.error(err);
         toast.error("❌ Failed to load products");
         setLoading(false);
       }
     };
-
     fetchProducts();
+
+    const handleResize = () => setIsSmall(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ----------------------------
-  // UI
-  // ----------------------------
   return (
     <div className="min-h-screen bg-gray-50 pt-20 mt-10">
       {loading ? (
@@ -182,6 +108,7 @@ const ElectronicPage = () => {
                     key={product._id}
                     className="bg-white rounded-lg shadow hover:shadow-md transition relative"
                   >
+                    {/* IMAGE LINK */}
                     <Link to={`/buy/${product._id}`}>
                       <img
                         src={product.image}
@@ -199,16 +126,34 @@ const ElectronicPage = () => {
                         {product.category}
                       </p>
 
+                      {/* DESCRIPTION */}
                       <ul className="text-sm text-gray-500 mb-3 list-disc ml-5">
-                        {(Array.isArray(product.description)
-                          ? product.description
-                          : [product.description]
-                        )
-                          .slice(0, 4)
-                          .map((point, i) => (
-                            <li key={i}>{point}</li>
-                          ))}
+                        {isSmall ? (
+                          <li>
+                            {Array.isArray(product.description)
+                              ? product.description[0]
+                              : product.description?.split(".")[0]}
+                            ...
+                          </li>
+                        ) : (
+                          (Array.isArray(product.description)
+                            ? product.description
+                            : [product.description]
+                          )
+                            .slice(0, 4)
+                            .map((point, i) => <li key={i}>{point}</li>)
+                        )}
                       </ul>
+
+                      {/* MORE DETAILS BUTTON */}
+                      {isSmall && (
+                        <button
+                          onClick={() => navigate(`/buy/${product._id}`)}
+                          className="text-blue-600 hover:underline mb-2"
+                        >
+                          More Details
+                        </button>
+                      )}
 
                       <div className="flex justify-between items-center">
                         <span className="text-lg font-bold text-green-700">

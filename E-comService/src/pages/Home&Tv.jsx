@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { FaCartPlus, FaFilter, FaTimes } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
+import { FaCartPlus, FaFilter, FaTimes, FaStar } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import FilterPage from "../components/FilterPage";
 import API from "../api";
@@ -10,26 +10,23 @@ const HomeAndTv = () => {
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFilter, setShowFilter] = useState(false);
+  const [isSmall, setIsSmall] = useState(false);
 
-  // Add to Cart (API auto changes between live + localhost)
+  const navigate = useNavigate();
+
+  // Add to Cart
   const handleAddToCart = async (productId) => {
     try {
-      await API.post("/users/cart/add", {
-        productId,
-        quantity: 1,
-      });
-
+      await API.post("/users/cart/add", { productId, quantity: 1 });
       toast.success("✅ Added to cart");
     } catch (err) {
-      if (err.response?.status === 401) {
+      if (err.response?.status === 401)
         toast.warning("⚠️ Please login to add items");
-      } else {
-        toast.error("❌ Failed to add to cart");
-      }
+      else toast.error("❌ Failed to add to cart");
     }
   };
 
-  // Filter Sidebar Config
+  // Filter Config
   const config = {
     price: { min: 0, max: 100000 },
     subcategories: {
@@ -42,38 +39,30 @@ const HomeAndTv = () => {
     ratings: [4, 3],
   };
 
-  // Apply Filters Function
+  // Apply Filters
   const applyFilters = ({ sub, maxPrice, ratings }) => {
     let temp = [...products];
-
     Object.entries(sub).forEach(([category, arr]) => {
-      if (arr.length > 0) {
+      if (arr.length)
         temp = temp.filter((p) =>
           p.tags?.some((tag) => arr.includes(tag.toLowerCase()))
         );
-      }
     });
-
     temp = temp.filter((p) => p.price <= maxPrice);
-
-    if (ratings.length > 0) {
+    if (ratings.length)
       temp = temp.filter((p) => ratings.some((r) => p.rating >= r));
-    }
-
     setFiltered(temp);
   };
 
-  // Fetch Products from API.js (auto: localhost + live)
+  // Fetch Products
   useEffect(() => {
     const loadProducts = async () => {
       try {
         const res = await API.get("/products/getallproducts");
         const all = res.data.products || [];
-
         const selected = all.filter((product) => {
           const name = product.name?.toLowerCase() || "";
           const category = product.category?.toLowerCase() || "";
-
           return (
             category.includes("tv") ||
             category.includes("appliance") ||
@@ -85,10 +74,8 @@ const HomeAndTv = () => {
             name.includes("fan")
           );
         });
-
         setProducts(selected);
         setFiltered(selected);
-
         setTimeout(() => setLoading(false), 500);
       } catch (err) {
         console.error("Product Load Error:", err);
@@ -98,6 +85,12 @@ const HomeAndTv = () => {
     };
 
     loadProducts();
+
+    // Detect small screen
+    const handleResize = () => setIsSmall(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
@@ -113,7 +106,7 @@ const HomeAndTv = () => {
         <h2 className="text-xl sm:text-2xl font-bold">TV & Appliances</h2>
       </div>
 
-      {/* Loading Animation */}
+      {/* Loading */}
       {loading ? (
         <div className="flex items-center justify-center min-h-[400px]">
           <img
@@ -129,72 +122,91 @@ const HomeAndTv = () => {
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
 
-          {/* Product List */}
-          <div className="flex-1 overflow-y-auto p-2">
+          {/* Product Grid */}
+          <div className="flex-1 overflow-y-auto p-2 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
             {filtered.length === 0 ? (
-              <div className="flex items-center justify-center min-h-[300px]">
+              <div className="flex items-center justify-center min-h-[300px] col-span-full">
                 <p className="text-gray-500 text-lg">No products found</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filtered.map((product) => (
-                  <div
-                    key={product._id}
-                    className="bg-white rounded-lg shadow hover:shadow-md transition relative"
-                  >
-                    <Link to={`/buy/${product._id}`}>
-                      <img
-                        src={product.image}
-                        className="h-48 w-full object-contain p-4"
-                        alt={product.name}
-                      />
-                    </Link>
+              filtered.map((product) => (
+                <div
+                  key={product._id}
+                  className="bg-white rounded-lg shadow hover:shadow-md transition relative flex flex-col"
+                >
+                  {/* IMAGE */}
+                  <Link to={`/buy/${product._id}`}>
+                    <img
+                      src={product.image}
+                      className="h-48 w-full object-contain p-4"
+                      alt={product.name}
+                    />
+                  </Link>
 
-                    <div className="px-4 pb-4">
+                  <div className="px-4 pb-4 flex-1 flex flex-col justify-between">
+                    <div>
                       <h3 className="text-lg font-semibold">{product.name}</h3>
                       <p className="text-sm text-gray-600 capitalize">
                         {product.category}
                       </p>
 
-                      <ul className="text-sm text-gray-500 ml-5 list-disc">
-                        {(Array.isArray(product.description)
-                          ? product.description
-                          : [product.description]
-                        )
-                          .slice(0, 3)
-                          .map((point, idx) => (
-                            <li key={idx}>{point}</li>
-                          ))}
+                      {/* Description */}
+                      <ul className="text-sm text-gray-500 mb-2 list-disc ml-5">
+                        {isSmall ? (
+                          <li>
+                            {Array.isArray(product.description)
+                              ? product.description[0]
+                              : product.description?.split(".")[0]}
+                            ...
+                          </li>
+                        ) : (
+                          (Array.isArray(product.description)
+                            ? product.description
+                            : [product.description]
+                          )
+                            .slice(0, 4)
+                            .map((point, idx) => <li key={idx}>{point}</li>)
+                        )}
                       </ul>
 
-                      <div className="flex justify-between items-center mt-2">
-                        <span className="text-lg text-green-700 font-bold">
-                          ₹{product.price}
-                        </span>
-                        {product.discount && (
-                          <span className="text-sm text-red-600 font-medium">
-                            {product.discount}% off
-                          </span>
-                        )}
-                      </div>
+                      {/* More Details */}
+                      {isSmall && (
+                        <button
+                          onClick={() => navigate(`/buy/${product._id}`)}
+                          className="text-blue-600 hover:underline mb-2"
+                        >
+                          More Details
+                        </button>
+                      )}
                     </div>
 
-                    {/* Add to Cart Button */}
-                    <button
-                      onClick={() => handleAddToCart(product._id)}
-                      className="absolute top-2 right-2 bg-blue-600 text-white p-2 rounded-full shadow hover:bg-blue-700 hover:scale-110 transition"
-                    >
-                      <FaCartPlus size={18} />
-                    </button>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-lg text-green-700 font-bold">
+                        ₹{product.price}
+                      </span>
+                      {product.discount && (
+                        <span className="text-sm text-red-600 font-medium">
+                          {product.discount}% off
+                        </span>
+                      )}
+                    </div>
                   </div>
-                ))}
-              </div>
+
+                  {/* Add to Cart */}
+                  <button
+                    onClick={() => handleAddToCart(product._id)}
+                    className="absolute top-2 right-2 bg-blue-600 text-white p-2 rounded-full shadow hover:bg-blue-700 hover:scale-110 transition"
+                  >
+                    <FaCartPlus size={18} />
+                  </button>
+                </div>
+              ))
             )}
           </div>
         </div>
       )}
 
-      {/* Mobile Filter Drawer */}
+      {/* Mobile Filter */}
       {showFilter && (
         <div className="fixed inset-0 z-50 flex">
           <div className="w-72 bg-white shadow-lg p-4">
@@ -210,7 +222,6 @@ const HomeAndTv = () => {
 
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
-
           <div
             className="flex-1 bg-black bg-opacity-30"
             onClick={() => setShowFilter(false)}

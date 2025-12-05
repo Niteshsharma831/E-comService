@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaCartPlus, FaFilter, FaTimes, FaStar } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import FilterPage from "../components/FilterPage";
@@ -10,7 +10,11 @@ const GroceryPage = () => {
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFilter, setShowFilter] = useState(false);
+  const [isSmall, setIsSmall] = useState(false);
 
+  const navigate = useNavigate();
+
+  // ➤ ADD TO CART
   const handleAddToCart = async (productId) => {
     try {
       await API.post("/users/cart/add", { productId, quantity: 1 });
@@ -21,6 +25,7 @@ const GroceryPage = () => {
     }
   };
 
+  // ➤ FILTER CONFIG
   const config = {
     price: { min: 0, max: 10000 },
     subcategories: {
@@ -33,6 +38,7 @@ const GroceryPage = () => {
     ratings: [4, 3],
   };
 
+  // ➤ APPLY FILTERS
   const applyFilters = ({ sub, maxPrice, ratings }) => {
     let temp = [...products];
     Object.entries(sub).forEach(([cat, arr]) => {
@@ -47,6 +53,7 @@ const GroceryPage = () => {
     setFiltered(temp);
   };
 
+  // ➤ FETCH PRODUCTS
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -75,7 +82,14 @@ const GroceryPage = () => {
         setLoading(false);
       }
     };
+
     fetchProducts();
+
+    // Detect small screen
+    const handleResize = () => setIsSmall(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
@@ -91,7 +105,6 @@ const GroceryPage = () => {
         <h2 className="text-2xl font-bold">🛒 Grocery Items</h2>
       </div>
 
-      {/* Loading */}
       {loading ? (
         <div className="flex items-center justify-center min-h-[400px]">
           <img
@@ -119,6 +132,7 @@ const GroceryPage = () => {
                   key={product._id}
                   className="bg-white rounded-lg shadow hover:shadow-lg transition duration-300 relative flex flex-col"
                 >
+                  {/* IMAGE */}
                   <Link to={`/buy/${product._id}`}>
                     <img
                       src={product.image}
@@ -135,6 +149,7 @@ const GroceryPage = () => {
                       <p className="text-sm text-gray-500 mb-2 capitalize">
                         {product.category}
                       </p>
+
                       <div className="flex items-center mb-2">
                         {[...Array(5)].map((_, i) => (
                           <FaStar
@@ -152,16 +167,34 @@ const GroceryPage = () => {
                         </span>
                       </div>
 
+                      {/* DESCRIPTION */}
                       <ul className="text-sm text-gray-500 mb-3 list-disc ml-5">
-                        {(Array.isArray(product.description)
-                          ? product.description
-                          : [product.description]
-                        )
-                          .slice(0, 4)
-                          .map((point, i) => (
-                            <li key={i}>{point}</li>
-                          ))}
+                        {isSmall ? (
+                          <li>
+                            {Array.isArray(product.description)
+                              ? product.description[0]
+                              : product.description?.split(".")[0]}
+                            ...
+                          </li>
+                        ) : (
+                          (Array.isArray(product.description)
+                            ? product.description
+                            : [product.description]
+                          )
+                            .slice(0, 4)
+                            .map((point, i) => <li key={i}>{point}</li>)
+                        )}
                       </ul>
+
+                      {/* MORE DETAILS BUTTON */}
+                      {isSmall && (
+                        <button
+                          onClick={() => navigate(`/buy/${product._id}`)}
+                          className="text-blue-600 hover:underline mb-2"
+                        >
+                          More Details
+                        </button>
+                      )}
                     </div>
 
                     <div className="flex justify-between items-center mt-2">
@@ -176,6 +209,7 @@ const GroceryPage = () => {
                     </div>
                   </div>
 
+                  {/* ADD TO CART BUTTON */}
                   <button
                     onClick={() => handleAddToCart(product._id)}
                     title="Add to Cart"
@@ -190,7 +224,7 @@ const GroceryPage = () => {
         </div>
       )}
 
-      {/* Mobile Filter */}
+      {/* Mobile Filter Drawer */}
       {showFilter && (
         <div className="fixed inset-0 z-50 flex">
           <div className="w-72 bg-white shadow-lg p-4 overflow-y-auto">

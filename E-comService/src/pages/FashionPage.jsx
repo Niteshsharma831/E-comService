@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import API from "../api";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaCartPlus, FaFilter, FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import FilterPage from "../components/FilterPage";
@@ -10,22 +10,18 @@ const FashionPage = () => {
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFilter, setShowFilter] = useState(false);
+  const [isSmall, setIsSmall] = useState(false);
+  const navigate = useNavigate();
 
-  // ➤ ADD TO CART (Auto Localhost + Live)
+  // ➤ ADD TO CART
   const handleAddToCart = async (productId) => {
     try {
-      await API.post("/users/cart/add", {
-        productId,
-        quantity: 1,
-      });
-
+      await API.post("/users/cart/add", { productId, quantity: 1 });
       toast.success("✅ Added to cart");
     } catch (err) {
-      if (err.response?.status === 401) {
+      if (err.response?.status === 401)
         toast.warning("⚠️ Please login to add items");
-      } else {
-        toast.error("❌ Failed to add to cart");
-      }
+      else toast.error("❌ Failed to add to cart");
     }
   };
 
@@ -75,9 +71,9 @@ const FashionPage = () => {
     ratings: [4, 3],
   };
 
+  // ➤ APPLY FILTERS
   const applyFilters = ({ sub, maxPrice, ratings }) => {
     let temp = [...products];
-
     Object.entries(sub).forEach(([cat, arr]) => {
       if (arr.length > 0) {
         temp = temp.filter((p) =>
@@ -85,28 +81,22 @@ const FashionPage = () => {
         );
       }
     });
-
     temp = temp.filter((p) => p.price <= maxPrice);
-
-    if (ratings.length > 0) {
+    if (ratings.length > 0)
       temp = temp.filter((p) => ratings.some((r) => p.rating >= r));
-    }
-
     setFiltered(temp);
   };
 
-  // ➤ FETCH PRODUCTS (Auto Localhost + Live)
+  // ➤ FETCH PRODUCTS
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await API.get("/products/getallproducts");
-
         const all = res.data.products || [];
 
         const filteredProducts = all.filter((product) => {
           const name = product.name?.toLowerCase() || "";
           const category = product.category?.toLowerCase() || "";
-
           return (
             category.includes("fashion") ||
             category.includes("clothing") ||
@@ -129,6 +119,12 @@ const FashionPage = () => {
     };
 
     fetchProducts();
+
+    // Detect small screen
+    const handleResize = () => setIsSmall(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
@@ -170,6 +166,7 @@ const FashionPage = () => {
                     key={product._id}
                     className="bg-white rounded-lg shadow hover:shadow-md transition relative"
                   >
+                    {/* IMAGE LINK */}
                     <Link to={`/buy/${product._id}`}>
                       <img
                         src={product.image}
@@ -186,16 +183,34 @@ const FashionPage = () => {
                         {product.category}
                       </p>
 
+                      {/* DESCRIPTION */}
                       <ul className="text-sm text-gray-500 mb-3 list-disc ml-5">
-                        {(Array.isArray(product.description)
-                          ? product.description
-                          : [product.description]
-                        )
-                          .slice(0, 4)
-                          .map((point, i) => (
-                            <li key={i}>{point}</li>
-                          ))}
+                        {isSmall ? (
+                          <li>
+                            {Array.isArray(product.description)
+                              ? product.description[0]
+                              : product.description?.split(".")[0]}
+                            ...
+                          </li>
+                        ) : (
+                          (Array.isArray(product.description)
+                            ? product.description
+                            : [product.description]
+                          )
+                            .slice(0, 4)
+                            .map((point, i) => <li key={i}>{point}</li>)
+                        )}
                       </ul>
+
+                      {/* MORE DETAILS BUTTON */}
+                      {isSmall && (
+                        <button
+                          onClick={() => navigate(`/buy/${product._id}`)}
+                          className="text-blue-600 hover:underline mb-2"
+                        >
+                          More Details
+                        </button>
+                      )}
 
                       <div className="flex justify-between items-center">
                         <span className="text-lg font-bold text-green-700">
@@ -237,7 +252,6 @@ const FashionPage = () => {
                 <FaTimes size={20} />
               </button>
             </div>
-
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
 
