@@ -11,9 +11,8 @@ const ProfilePage = () => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
-      navigate("/login");
-    } else {
+    if (!storedUser) navigate("/login");
+    else {
       const userData = JSON.parse(storedUser);
       setUser(userData);
       setFormData({
@@ -34,14 +33,15 @@ const ProfilePage = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("https://e-comservice.onrender.com/api/users/update", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(formData),
-      });
+      const res = await fetch(
+        "https://e-comservice.onrender.com/api/users/update",
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!res.ok) throw new Error("Update failed");
 
@@ -75,31 +75,30 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="pt-24 px-4 bg-gray-100 mt-20">
+    <div className="pt-24 px-4 bg-gray-100 min-h-screen mt-10">
       <ToastContainer />
-      <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+      {/* Profile Card */}
+      <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl p-8 mb-10">
         <div className="flex flex-col md:flex-row items-center gap-8">
-          {/* Profile Picture or Initials */}
-          <div className="w-32 h-32 rounded-full overflow-hidden border shadow-md">
+          {/* Avatar */}
+          <div className="w-32 h-32 rounded-full overflow-hidden border shadow-md flex items-center justify-center bg-blue-50 text-blue-700 text-4xl font-bold">
             {user.profilePicture ? (
               <img
                 src={user.profilePicture}
                 alt="Profile"
                 className="w-full h-full object-cover"
                 onError={(e) => {
+                  // fallback to initials if image fails to load
                   e.target.onerror = null;
-                  e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    user.name || "User"
-                  )}&background=0D8ABC&color=fff`;
+                  e.target.src = ""; // remove broken image
                 }}
               />
             ) : (
-              <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-700 text-4xl font-bold">
-                {getInitials(user.name || "User")}
-              </div>
+              getInitials(user.name || "User")
             )}
           </div>
 
+          {/* User Info */}
           <div className="flex-1 space-y-4">
             <h2 className="text-3xl font-bold text-gray-800">My Profile</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
@@ -135,16 +134,17 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            <div className="mt-8 flex flex-col md:flex-row gap-4">
+            {/* Action Buttons */}
+            <div className="mt-6 flex flex-col md:flex-row gap-4">
               <button
                 onClick={() => navigate("/")}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow transition"
               >
                 Back to Home
               </button>
               <button
                 onClick={() => setShowEdit(true)}
-                className="border border-blue-600 text-blue-600 px-5 py-2 rounded-md hover:bg-blue-50"
+                className="border border-blue-600 text-blue-600 px-5 py-2 rounded-md hover:bg-blue-50 transition"
               >
                 Edit Profile
               </button>
@@ -153,10 +153,31 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Edit Modal */}
+      {/* Recent Orders Section */}
+      <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-2xl p-6 mb-10">
+        <h3 className="text-2xl font-bold mb-6 text-gray-800">Recent Orders</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((order) => (
+            <div
+              key={order}
+              className="p-4 border rounded-lg shadow hover:shadow-md transition bg-gray-50"
+            >
+              <p className="text-gray-700 font-medium mb-1">
+                Order #{Math.floor(Math.random() * 10000)}
+              </p>
+              <p className="text-gray-500 mb-2">Status: Delivered</p>
+              <p className="text-gray-600 font-semibold">
+                Total: ₹{Math.floor(Math.random() * 5000)}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Edit Profile Modal */}
       {showEdit && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-full max-w-lg relative shadow-lg">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white p-6 rounded-xl w-full max-w-lg relative shadow-lg animate-slide-in">
             <h2 className="text-xl font-bold mb-4 text-blue-600">
               Edit Your Profile
             </h2>
@@ -167,7 +188,7 @@ const ProfilePage = () => {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Full Name"
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
               />
               <input
                 type="email"
@@ -175,7 +196,7 @@ const ProfilePage = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Email"
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
               />
               <input
                 type="text"
@@ -183,7 +204,7 @@ const ProfilePage = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="Phone Number"
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
               />
               <input
                 type="text"
@@ -191,13 +212,13 @@ const ProfilePage = () => {
                 value={formData.address}
                 onChange={handleChange}
                 placeholder="Address"
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
               />
               <select
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
               >
                 <option value="">Select Gender</option>
                 <option value="Male">Male</option>
@@ -209,13 +230,13 @@ const ProfilePage = () => {
                 <button
                   type="button"
                   onClick={() => setShowEdit(false)}
-                  className="bg-gray-300 px-4 py-2 rounded-md"
+                  className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
                 >
                   Save
                 </button>

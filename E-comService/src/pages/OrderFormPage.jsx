@@ -14,12 +14,11 @@ const OrderFormPage = () => {
     phone: "",
     address: "",
     pincode: "",
-    paymentMethod: "COD", // ⭐ Default is COD
+    paymentMethod: "COD",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Auto-fill user details
   useEffect(() => {
     API.get("/users/profile")
       .then((res) => {
@@ -27,7 +26,7 @@ const OrderFormPage = () => {
         setForm((prev) => ({
           ...prev,
           fullName: name || "",
-          gender: gender || "Gender",
+          gender: gender || "Male",
           phone: phone || "",
           address: address || "",
         }));
@@ -43,13 +42,12 @@ const OrderFormPage = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Submit order
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     if (!product?._id) {
-      toast.error("❌ Invalid product details. Please try again.");
+      toast.error("❌ Invalid product details.");
       setIsSubmitting(false);
       return;
     }
@@ -61,13 +59,13 @@ const OrderFormPage = () => {
 
     try {
       if (form.paymentMethod === "COD") {
-        // COD Order
         await API.post("/users/create-order", orderPayload);
         toast.success("✅ Order placed successfully!");
         navigate("/order-success", { state: { product } });
       } else {
-        // ONLINE PAYMENT
-        navigate("/razorpay-payment", { state: { orderPayload, product } });
+        navigate("/razorpay-payment", {
+          state: { orderPayload, product, from: location.pathname },
+        });
       }
     } catch (err) {
       console.error("Order Error:", err.response?.data || err.message);
@@ -84,38 +82,42 @@ const OrderFormPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 px-4 py-16">
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div className="min-h-screen bg-gray-50 px-4 py-16 mt-20">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
         {/* Order Summary */}
-        <div className="bg-white rounded shadow p-6">
-          <h2 className="text-xl font-semibold border-b pb-3 mb-4">
+        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+          <h2 className="text-2xl font-bold text-indigo-700 mb-6 flex items-center gap-2">
             📦 Order Summary
           </h2>
 
-          <div className="flex items-center gap-4 mb-4">
+          <div className="flex items-center gap-4 mb-6">
             <img
-              src={product?.image}
+              src={product?.image || "https://placehold.co/100x100"}
               alt={product?.name}
-              className="w-24 h-24 object-contain border rounded"
+              className="w-28 h-28 object-cover rounded-xl border"
             />
-            <div>
-              <h3 className="font-semibold text-lg">{product?.name}</h3>
-              <p className="text-sm text-gray-600">
-                Category: {product?.category}
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg text-gray-800">
+                {product?.name || "Product Name"}
+              </h3>
+              <p className="text-sm text-gray-500">
+                Category: {product?.category || "-"}
               </p>
-              <p className="text-sm text-gray-600">Brand: {product?.brand}</p>
-              <p className="text-yellow-500 text-sm">⭐ 5 / 5</p>
-              <p className="text-green-600 text-sm">
+              <p className="text-sm text-gray-500">
+                Brand: {product?.brand || "-"}
+              </p>
+              <p className="text-yellow-400 font-semibold mt-1">⭐ 5.0</p>
+              <p className="text-sm text-green-600 mt-1">
                 Delivery by:{" "}
                 {new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toDateString()}
               </p>
             </div>
           </div>
 
-          <div className="text-sm space-y-2">
+          <div className="space-y-3 text-gray-700">
             <div className="flex justify-between">
               <span>Price</span>
-              <span>₹{product?.price}</span>
+              <span className="font-medium">₹{product?.price || 0}</span>
             </div>
             <div className="flex justify-between text-green-600">
               <span>Discount</span>
@@ -125,8 +127,8 @@ const OrderFormPage = () => {
               <span>Delivery Charges</span>
               <span>FREE</span>
             </div>
-            <hr />
-            <div className="flex justify-between font-semibold text-lg">
+            <hr className="my-2" />
+            <div className="flex justify-between font-semibold text-lg text-gray-800">
               <span>Total Amount</span>
               <span>₹{calculateDiscountedPrice()}</span>
             </div>
@@ -134,9 +136,9 @@ const OrderFormPage = () => {
         </div>
 
         {/* Delivery Form */}
-        <div className="bg-white rounded shadow p-6">
-          <h2 className="text-xl font-semibold border-b pb-3 mb-4">
-            📝 Enter Delivery Details
+        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+          <h2 className="text-2xl font-bold text-indigo-700 mb-6 flex items-center gap-2">
+            📝 Delivery Details
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -147,14 +149,14 @@ const OrderFormPage = () => {
               value={form.fullName}
               onChange={handleChange}
               required
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-indigo-300 focus:outline-none"
             />
 
             <select
               name="gender"
               value={form.gender}
               onChange={handleChange}
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-indigo-300 focus:outline-none"
             >
               <option>Male</option>
               <option>Female</option>
@@ -168,7 +170,7 @@ const OrderFormPage = () => {
               value={form.phone}
               onChange={handleChange}
               required
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-indigo-300 focus:outline-none"
             />
 
             <input
@@ -178,24 +180,22 @@ const OrderFormPage = () => {
               value={form.pincode}
               onChange={handleChange}
               required
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-indigo-300 focus:outline-none"
             />
 
             <textarea
               name="address"
-              placeholder="Delivery Full Address"
+              placeholder="Full Delivery Address"
               value={form.address}
               onChange={handleChange}
               required
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-indigo-300 focus:outline-none resize-none"
             />
 
             {/* Payment Method */}
-            <div>
-              <label className="block font-semibold mb-1">
-                Payment Method:
-              </label>
-              <div className="flex gap-4">
+            <div className="mt-2">
+              <span className="block font-semibold mb-2">Payment Method:</span>
+              <div className="flex gap-6">
                 <label className="flex items-center gap-2">
                   <input
                     type="radio"
@@ -220,11 +220,10 @@ const OrderFormPage = () => {
               </div>
             </div>
 
-            {/* ⭐ Dynamic Button Label */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition-all disabled:opacity-50"
             >
               {form.paymentMethod === "Online"
                 ? isSubmitting
