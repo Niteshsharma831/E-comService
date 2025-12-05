@@ -1,47 +1,48 @@
-// routes/paymentRoutes.js
 const express = require("express");
 const router = express.Router();
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Order = require("../models/orderModel");
+const adminAuth = require("../middlewares/adminAuth"); // ✅ your existing middleware
 
-// Razorpay instance - MUST MATCH .env names
+// Razorpay Instance
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
 /* ---------------------------------
-   1️⃣ CREATE RAZORPAY ORDER
+   1️⃣ CREATE ORDER
 ---------------------------------- */
 router.post("/create-razorpay-order", async (req, res) => {
   try {
-    const { amount } = req.body;
+    let { amount } = req.body;
 
-    if (!amount) return res.status(400).json({ error: "Amount is required" });
+    if (!amount) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Amount required" });
+    }
 
-    const options = {
-      amount: Number(amount),
+    amount = Number(amount);
+
+    const order = await razorpay.orders.create({
+      amount,
       currency: "INR",
       receipt: "receipt_" + Date.now(),
-    };
-
-    const order = await razorpay.orders.create(options);
-
-    res.json({ success: true, order });
-  } catch (err) {
-    console.error("Razorpay Order Error:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to create Razorpay order",
     });
+
+    return res.json({ success: true, order });
+  } catch (err) {
+    console.error("❌ Error Creating Razorpay Order:", err);
+    res.status(500).json({ success: false, message: "Failed to create order" });
   }
 });
 
 /* ---------------------------------
-   2️⃣ VERIFY PAYMENT + SAVE ORDER
+   2️⃣ VERIFY PAYMENT
 ---------------------------------- */
-router.post("/verify-razorpay-payment", async (req, res) => {
+router.post("/verify-razorpay-payment", adminAuth, async (req, res) => {
   try {
     const {
       razorpay_payment_id,
@@ -51,43 +52,41 @@ router.post("/verify-razorpay-payment", async (req, res) => {
     } = req.body;
 
     if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing required payment fields",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
     }
 
-    // Generate signature
-    const expectedSignature = crypto
+    // Signature verification
+    const sign = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(razorpay_order_id + "|" + razorpay_payment_id)
       .digest("hex");
 
-    if (expectedSignature !== razorpay_signature) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid signature",
-      });
+    if (sign !== razorpay_signature) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Signature verification failed" });
     }
 
-    // Save order to DB
+    // SAVE ORDER IN DATABASE
     const newOrder = await Order.create({
       ...orderPayload,
-      status: "Confirmed",
+      userId: req.adminId, // ✅ use token from your middleware
       paymentId: razorpay_payment_id,
+      paymentStatus: "Success",
     });
 
-    res.json({
+    return res.json({
       success: true,
+      orderId: newOrder._id,
       message: "Payment verified successfully",
-      order: newOrder,
     });
   } catch (err) {
-    console.error("Payment Verification Error:", err);
-    res.status(500).json({
-      success: false,
-      message: "Payment verification failed",
-    });
+    console.error("❌ Razorpay Verification Error:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Verification failed" });
   }
 });
 

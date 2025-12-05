@@ -1,11 +1,12 @@
 const dotenv = require("dotenv");
 
 // Load environment variables based on NODE_ENV
-if (process.env.NODE_ENV === "production") {
-  dotenv.config({ path: ".env.production" });
-} else {
-  dotenv.config({ path: ".env.development" });
-}
+dotenv.config({
+  path:
+    process.env.NODE_ENV === "production"
+      ? ".env.production"
+      : ".env.development",
+});
 
 const express = require("express");
 const app = express();
@@ -18,42 +19,36 @@ const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 connectDB();
 
-// CORS Setup for Localhost + Live Frontend
-
+// Allowed origins
 const allowedOrigins = [
-  "http://localhost:3000", // React Local
-  "http://localhost:5173", // Vite Local
-  "https://shopizo-online.vercel.app", // Live frontend
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://shopizo-online.vercel.app",
 ];
 
+// CORS Middleware
 app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("❌ Not allowed by CORS"));
+        return callback(null, true);
       }
+      return callback(new Error("❌ Not allowed by CORS"));
     },
     credentials: true,
   })
 );
 
-// Middleware
+// Body Parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Routes
-const userRoutes = require("./routes/userRoutes");
-const productRoutes = require("./routes/productRoutes");
-const adminRoutes = require("./routes/adminRoutes");
-const paymentRoutes = require("./routes/paymentRoutes");
-
-app.use("/api/users", userRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/payment", paymentRoutes);
+app.use("/api/users", require("./routes/userRoutes"));
+app.use("/api/products", require("./routes/productRoutes"));
+app.use("/api/admin", require("./routes/adminRoutes"));
+app.use("/api/payment", require("./routes/paymentRoutes"));
 
 // Health Check
 app.get("/", (req, res) => {
