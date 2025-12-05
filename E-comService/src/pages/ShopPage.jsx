@@ -12,11 +12,9 @@ const ShopPage = () => {
   const [loading, setLoading] = useState(true);
   const [showFilter, setShowFilter] = useState(false);
 
-  // ---------------- Add to Cart --------------------
   const handleAddToCart = async (productId) => {
     try {
       await API.post("/users/cart/add", { productId, quantity: 1 });
-
       toast.success("Added to cart ✔", {
         position: "top-right",
         autoClose: 2000,
@@ -36,7 +34,6 @@ const ShopPage = () => {
     }
   };
 
-  // ---------------- Filter Config --------------------
   const config = {
     price: { min: 0, max: 100000 },
     subcategories: {
@@ -86,10 +83,8 @@ const ShopPage = () => {
     ratings: [4, 3],
   };
 
-  // ---------------- Apply Filters --------------------
   const applyFilters = ({ sub, maxPrice, ratings }) => {
     let temp = [...products];
-
     Object.entries(sub).forEach(([cat, arr]) => {
       if (arr.length > 0) {
         temp = temp.filter((p) =>
@@ -97,21 +92,17 @@ const ShopPage = () => {
         );
       }
     });
-
     temp = temp.filter((p) => p.price <= maxPrice);
     if (ratings.length > 0)
       temp = temp.filter((p) => ratings.some((r) => p.rating >= r));
-
     setFiltered(temp);
   };
 
-  // ---------------- Fetch Products --------------------
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await API.get("/products/getallproducts");
         const all = res.data.products || [];
-
         setProducts(all);
         setFiltered(all);
         setTimeout(() => setLoading(false), 700);
@@ -120,7 +111,6 @@ const ShopPage = () => {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
@@ -139,63 +129,52 @@ const ShopPage = () => {
             </div>
           </div>
 
-          {/* Mobile Filter Button */}
-          <button
-            className="lg:hidden fixed top-24 left-4 z-50 flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-md shadow-md"
-            onClick={() => setShowFilter(true)}
-          >
-            <FaFilter /> Filter
-          </button>
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col overflow-y-auto p-3 sm:p-5">
+            {/* Header Row */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl sm:text-2xl font-bold">
+                Explore Products
+              </h2>
 
-          {/* Mobile Filter Drawer */}
-          {showFilter && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex">
-              <div className="w-72 bg-white h-full p-4 relative shadow-xl">
-                <button
-                  className="absolute top-3 right-3 text-red-600"
-                  onClick={() => setShowFilter(false)}
-                >
-                  <FaTimes size={20} />
-                </button>
-                <FilterPage categoriesConfig={config} onApply={applyFilters} />
-              </div>
-              <div
-                className="flex-1"
-                onClick={() => setShowFilter(false)}
-              ></div>
+              {/* Mobile Filter Button */}
+              <button
+                className="lg:hidden flex items-center gap-1 bg-indigo-600 text-white px-3 py-2 rounded-md shadow-md"
+                onClick={() => setShowFilter(true)}
+              >
+                <FaFilter /> Filter
+              </button>
             </div>
-          )}
 
-          {/* Product Grid */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-5">
-            <h2 className="text-xl sm:text-2xl font-bold mb-4">
-              Explore Products
-            </h2>
+            {/* Mobile Filter Drawer */}
+            {showFilter && (
+              <div className="fixed inset-0 bg-black/50 z-50 flex">
+                <div className="w-72 bg-white h-full p-4 relative shadow-xl">
+                  <button
+                    className="absolute top-3 right-3 text-red-600"
+                    onClick={() => setShowFilter(false)}
+                  >
+                    <FaTimes size={20} />
+                  </button>
+                  <FilterPage
+                    categoriesConfig={config}
+                    onApply={applyFilters}
+                  />
+                </div>
+                <div className="flex-1" onClick={() => setShowFilter(false)} />
+              </div>
+            )}
 
+            {/* Product Grid */}
             {filtered.length === 0 ? (
               <p className="text-gray-600 text-lg">No products found.</p>
             ) : (
-              <div
-                className="
-                  grid 
-                  grid-cols-2 
-                  sm:grid-cols-2 
-                  md:grid-cols-3 
-                  xl:grid-cols-4 
-                  gap-4 
-                  sm:gap-6
-                "
-              >
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {filtered.map((product) => (
                   <div
                     key={product._id}
-                    className="
-                      bg-white rounded-xl shadow hover:shadow-lg 
-                      transition-all duration-200 overflow-hidden relative
-                      border border-gray-200
-                    "
+                    className="bg-white rounded-xl shadow hover:shadow-lg transition-all duration-200 overflow-hidden relative border border-gray-200"
                   >
-                    {/* Product Image */}
                     <Link to={`/buy/${product._id}`}>
                       <div className="bg-gray-100 p-3 sm:p-4">
                         <img
@@ -206,16 +185,13 @@ const ShopPage = () => {
                       </div>
                     </Link>
 
-                    {/* Product Content */}
                     <div className="px-3 sm:px-4 py-3">
                       <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-1">
                         {product.name}
                       </h3>
-
                       <p className="text-xs sm:text-sm text-gray-500 capitalize">
                         {product.category}
                       </p>
-
                       <div className="flex items-center gap-1 mt-1 text-yellow-500">
                         {Array(4)
                           .fill()
@@ -223,7 +199,6 @@ const ShopPage = () => {
                             <FaStar key={i} size={12} />
                           ))}
                       </div>
-
                       <ul className="text-xs sm:text-sm text-gray-600 mt-2 list-disc ml-4">
                         {(Array.isArray(product.description)
                           ? product.description
@@ -234,7 +209,6 @@ const ShopPage = () => {
                             <li key={i}>{point}</li>
                           ))}
                       </ul>
-
                       <div className="flex justify-between items-center mt-3">
                         <span className="text-lg font-bold text-green-700">
                           ₹{product.price}
@@ -247,35 +221,12 @@ const ShopPage = () => {
                       </div>
                     </div>
 
-                    {/* Add to Cart (Perfect Size Everywhere) */}
                     <button
                       title="Add to Cart"
                       onClick={() => handleAddToCart(product._id)}
-                      className="
-                                absolute top-2 right-2
-                                bg-blue-600 text-white 
-                                rounded-full shadow 
-                                hover:bg-blue-700 
-                                transition-all duration-300
-
-                                /* CENTER ICON */
-                                flex items-center justify-center
-
-                                /* FIXED BLUE CIRCLE SIZE */
-                                w-8 h-8             
-                                sm:w-9 sm:h-9       
-                                md:w-8 md:h-8       
-                                lg:w-8 lg:h-8       
-                              "
+                      className="absolute top-2 right-2 bg-blue-600 text-white rounded-full shadow hover:bg-blue-700 flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9"
                     >
-                      <FaCartPlus
-                        className="
-                                  text-[15px]        
-                                  sm:text-[18px]     
-                                  md:text-[20px]     
-                                  lg:text-[20px]     
-                                "
-                      />
+                      <FaCartPlus className="text-[15px] sm:text-[18px]" />
                     </button>
                   </div>
                 ))}
