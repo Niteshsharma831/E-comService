@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "../api";
 import { Link, useNavigate } from "react-router-dom";
-import { FaCartPlus } from "react-icons/fa";
+import { FaCartPlus, FaFilter, FaTimes } from "react-icons/fa";
 import FilterPage from "../components/FilterPage";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,9 +11,9 @@ const ElectronicPage = () => {
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSmall, setIsSmall] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const navigate = useNavigate();
 
-  // ---------------- Add to Cart --------------------
   const handleAddToCart = async (productId) => {
     try {
       await API.post("/users/cart/add", { productId, quantity: 1 });
@@ -24,7 +24,6 @@ const ElectronicPage = () => {
     }
   };
 
-  // ---------------- Filter Config --------------------
   const config = {
     price: { min: 0, max: 150000 },
     subcategories: {
@@ -36,7 +35,6 @@ const ElectronicPage = () => {
     ratings: [4, 3],
   };
 
-  // ---------------- Apply Filters --------------------
   const applyFilters = ({ sub, maxPrice, ratings }) => {
     let temp = [...products];
     Object.entries(sub).forEach(([cat, arr]) => {
@@ -51,7 +49,6 @@ const ElectronicPage = () => {
     setFiltered(temp);
   };
 
-  // ---------------- Fetch Products --------------------
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -86,19 +83,51 @@ const ElectronicPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-0 sm:pt-20">
+    <div className="min-h-screen bg-gray-50 pt-20">
       {loading ? (
         <div className="flex justify-center items-center min-h-[400px]">
           <img src="/loader.gif" alt="Loading..." className="w-40 h-40" />
         </div>
       ) : (
-        <div className="flex h-[calc(100vh-80px)] overflow-hidden">
-          {/* LEFT FILTER SIDEBAR */}
+        <div className="flex h-[calc(100vh-80px)] overflow-hidden relative">
+          {/* Desktop Filter */}
           <div className="w-64 hidden lg:block sticky top-20 h-full overflow-y-auto p-4 bg-white shadow">
             <FilterPage categoriesConfig={config} onApply={applyFilters} />
           </div>
 
-          {/* PRODUCT LISTING */}
+          {/* Mobile Filter Button */}
+          {isSmall && (
+            <button
+              className="fixed top-24 left-2 z-50 flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-md shadow-md"
+              onClick={() => setShowFilter(true)}
+            >
+              <FaFilter /> Filter
+            </button>
+          )}
+
+          {/* Mobile Filter Drawer */}
+          {showFilter && (
+            <div className="fixed inset-0 z-50 flex">
+              <div className="w-72 bg-white h-full p-4 relative shadow-xl">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold">Filters</h2>
+                  <button
+                    className="text-red-600"
+                    onClick={() => setShowFilter(false)}
+                  >
+                    <FaTimes size={20} />
+                  </button>
+                </div>
+                <FilterPage categoriesConfig={config} onApply={applyFilters} />
+              </div>
+              <div
+                className="flex-1 bg-black bg-opacity-30"
+                onClick={() => setShowFilter(false)}
+              />
+            </div>
+          )}
+
+          {/* Product Grid */}
           <div className="flex-1 overflow-y-auto">
             <h2 className="text-2xl font-bold mb-4 px-2 sm:px-4">
               Electronic Products
@@ -111,17 +140,14 @@ const ElectronicPage = () => {
             ) : (
               <div
                 className={`grid gap-4 sm:gap-6 ${
-                  isSmall
-                    ? "grid-cols-2"
-                    : "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
-                } px-0 sm:px-4`}
+                  isSmall ? "grid-cols-2 px-2" : "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 px-4"
+                }`}
               >
                 {filtered.map((product) => (
                   <div
                     key={product._id}
                     className="bg-white rounded-lg shadow hover:shadow-md transition relative"
                   >
-                    {/* IMAGE LINK */}
                     <Link to={`/buy/${product._id}`}>
                       <img
                         src={product.image}
@@ -134,12 +160,10 @@ const ElectronicPage = () => {
                       <h3 className="text-lg font-semibold text-gray-800 mb-1 line-clamp-1">
                         {product.name}
                       </h3>
-
                       <p className="text-sm text-gray-600 mb-2 capitalize">
                         {product.category}
                       </p>
 
-                      {/* DESCRIPTION */}
                       <ul className="text-sm text-gray-500 mb-2 list-disc ml-5">
                         {isSmall ? (
                           <li>
@@ -158,7 +182,6 @@ const ElectronicPage = () => {
                         )}
                       </ul>
 
-                      {/* MORE DETAILS BUTTON */}
                       {isSmall && (
                         <button
                           onClick={() => navigate(`/buy/${product._id}`)}
@@ -172,7 +195,6 @@ const ElectronicPage = () => {
                         <span className="text-lg font-bold text-green-700">
                           ₹{product.price}
                         </span>
-
                         {product.discount && (
                           <span className="text-sm text-red-600 font-medium">
                             {product.discount}% off
