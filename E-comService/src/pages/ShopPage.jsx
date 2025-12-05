@@ -209,6 +209,17 @@ const ShopPage = () => {
                             <li key={i}>{point}</li>
                           ))}
                       </ul>
+
+                      {/* Small screen "More Details" link */}
+                      <div className="sm:hidden">
+                        <Link
+                          to={`/buy/${product._id}`}
+                          className="text-indigo-600 mt-2 text-sm font-medium underline block"
+                        >
+                          More Details
+                        </Link>
+                      </div>
+
                       <div className="flex justify-between items-center mt-3">
                         <span className="text-lg font-bold text-green-700">
                           ₹{product.price}
