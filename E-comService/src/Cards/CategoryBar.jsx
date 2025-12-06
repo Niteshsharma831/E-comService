@@ -62,32 +62,32 @@ const CategoryBar = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="fixed top-25 left-0 w-full bg-white shadow-md z-40">
-      <div className="flex justify-center">
-        <div className="flex gap-8 overflow-x-auto scrollbar-hide px-4 py-3 w-full max-w-screen-xl">
-          {categories.map((cat, index) => (
-            <div
-              key={index}
-              className={`flex flex-col items-center text-sm cursor-pointer min-w-[80px] ${
-                cat.route
-                  ? "hover:text-blue-600"
-                  : "text-gray-400 cursor-default"
-              }`}
-              onClick={() => {
-                if (cat.route) navigate(cat.route);
-              }}
-            >
-              <div className="h-14 w-14 flex items-center justify-center bg-gray-100 rounded-full overflow-hidden">
-                <img
-                  src={cat.image}
-                  alt={cat.name}
-                  className="h-10 w-10 object-contain"
-                />
-              </div>
-              <span className="mt-1 text-center">{cat.name}</span>
+    <div className="w-full">
+      <div className="flex gap-4 sm:gap-6 md:gap-8 overflow-x-auto scrollbar-hide pb-2">
+        {categories.map((cat, index) => (
+          <div
+            key={index}
+            className={`flex flex-col items-center cursor-pointer flex-shrink-0 ${
+              cat.route
+                ? "hover:text-blue-600 transition-colors"
+                : "text-gray-400 cursor-default"
+            }`}
+            onClick={() => {
+              if (cat.route) navigate(cat.route);
+            }}
+          >
+            <div className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 flex items-center justify-center bg-gray-100 rounded-full overflow-hidden hover:bg-gray-200 transition-colors">
+              <img
+                src={cat.image}
+                alt={cat.name}
+                className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 object-contain"
+              />
             </div>
-          ))}
-        </div>
+            <span className="mt-1 text-center text-xs sm:text-sm font-medium whitespace-nowrap">
+              {cat.name}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
