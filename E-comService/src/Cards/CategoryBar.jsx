@@ -2,7 +2,12 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const categories = [
-  { name: "Minutes", image: "/images/minutes.png", route: null },
+  {
+    name: "Offers",
+    image:
+      "https://www.copywritematters.com/wp-content/uploads/2022/02/bigstock-Guy-with-megaphone-and-white-b-41799547.jpg",
+    route: null,
+  },
   {
     name: "Mobiles & Tablets",
     image:
@@ -33,7 +38,12 @@ const categories = [
       "https://static-assets.business.amazon.com/assets/in/24th-jan/705_Website_Blog_Appliances_1450x664.jpg.transform/1450x664/image.jpg",
     route: "/home&tv",
   },
-  { name: "Flight Bookings", image: "/images/flight.png", route: null },
+  {
+    name: "Flight Bookings",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQF_hv8MRQYluOdn720-5owg0gU6kCn4iPvfg&s",
+    route: "/booking",
+  },
   {
     name: "Beauty, Food..",
     image:

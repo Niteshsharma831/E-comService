@@ -73,7 +73,7 @@ const Home = () => {
                 name: "Canon DSLR Camera",
                 price: "₹48,500",
                 image:
-                  "https://m.media-amazon.com/images/I/81P1L85KinL._SX679_.jpg",
+                  "https://utgadgets.com/cdn/shop/files/Canon_400D_DSLR_Camera_with_28-80mm_lens_-_Best_Price_in_Pakistan_3264x.jpg?v=1737635269",
               },
               {
                 name: "Sony Bluetooth Speaker",
@@ -85,13 +85,13 @@ const Home = () => {
                 name: "Nike Sports Shoes",
                 price: "₹4,299",
                 image:
-                  "https://m.media-amazon.com/images/I/71ZVjRaYLXL._SY695_.jpg",
+                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiRtYAM7d7TeCp3klPRtNIw2RFUyy7CBijnQ&s",
               },
               {
                 name: "HP Laptop 15s",
                 price: "₹52,990",
                 image:
-                  "https://m.media-amazon.com/images/I/71Y8r3VXyUL._SX679_.jpg",
+                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPWiwW678dEErD4DBcUwmUV2NmDnARLxW2pQ&s",
               },
               {
                 name: "boAt Wireless Earbuds",
@@ -103,7 +103,7 @@ const Home = () => {
                 name: "Mi Smart LED TV",
                 price: "₹32,499",
                 image:
-                  "https://m.media-amazon.com/images/I/710U0k4hTSL._SX679_.jpg",
+                  "https://5.imimg.com/data5/ANDROID/Default/2023/1/LV/FW/RY/160159535/product-jpeg-500x500.jpg",
               },
             ].map((item, i) => (
               <div

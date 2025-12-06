@@ -1,9 +1,12 @@
 @import "tailwindcss";
-html, body {
+@import "react-datepicker/dist/react-datepicker.css";
+
+html,
+body {
   touch-action: pan-y;
   overscroll-behavior-x: contain;
   overflow-x: hidden;
-} 
+}
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -17,7 +20,6 @@ html, body {
     @apply w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500;
   }
 }
-
 
 @keyframes fadeInUp {
   0% {

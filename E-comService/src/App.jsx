@@ -53,6 +53,8 @@ import MyOrdersPage from "./pages/OrderPage";
 // Utilities
 import ScrollToTop from "./hooks/ScrollToTop";
 import RazorpayPayment from "./pages/RazorpayPayment";
+import About from "./pages/About";
+import Booking from "./context/BookingPage";
 
 // ✅ Detect if on admin route
 const useIsAdminRoute = () => {
@@ -83,6 +85,8 @@ const AppContent = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/smartphone" element={<SmartPhones />} />
         <Route path="/buy/:id" element={<ProductDetailPage />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/booking" element={<Booking />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/electronic" element={<ElectronicPage />} />

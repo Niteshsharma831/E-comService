@@ -31,9 +31,9 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <a href="/about" className="hover:text-white">
+              <Link to="/about" className="hover:text-white">
                 About
-              </a>
+              </Link>
             </li>
             <li>
               <a href="/contact" className="hover:text-white">
@@ -145,7 +145,8 @@ const Footer = () => {
         <p className="mt-1">
           Portfolio:
           <a
-            href="https://myportfolio-ui-2pab.onrender.com/"
+            href="https://devcraftnitesh.vercel.app/"
+            // href="https://myportfolio-ui-2pab.onrender.com/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:underline mx-1"
